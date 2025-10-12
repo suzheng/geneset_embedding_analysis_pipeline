@@ -31,3 +31,4 @@ def test_load_embeddings_and_lookup(tmp_path):
     assert np.allclose(vectors[1], np.array([3, 4, 5], dtype=np.float32))
 
 
+

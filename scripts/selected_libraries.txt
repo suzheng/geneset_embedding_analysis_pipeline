@@ -1,0 +1,43 @@
+Library_Filename	Group	Group_Clean
+GO_Biological_Process_2025.tsv	Gene Ontology	Gene_Ontology
+GO_Molecular_Function_2025.tsv	Gene Ontology	Gene_Ontology
+GO_Cellular_Component_2025.tsv	Gene Ontology	Gene_Ontology
+Reactome_Pathways_2024.tsv	Pathways	Pathways
+BioPlanet_2019.tsv	Pathways	Pathways
+LINCS_L1000_Chem_Pert_Consensus_Sigs.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+RummaGEO_DrugPerturbations_2025.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+L1000_Kinase_and_GPCR_Perturbations_up.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+L1000_Kinase_and_GPCR_Perturbations_down.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+DrugMatrix.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+DSigDB.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
+LINCS_L1000_CRISPR_KO_Consensus_Sigs.tsv	Gene Perturbations	Gene_Perturbations
+RummaGEO_GenePerturbations_2025.tsv	Gene Perturbations	Gene_Perturbations
+PerturbAtlas.tsv	General Perturbations	Gene_Perturbations
+DisGeNET.tsv	Disease & Phenotype Associations	Disease_and_Phenotype_Associations
+Jensen_DISEASES.tsv	Disease & Phenotype Associations	Disease_and_Phenotype_Associations
+GWAS_Catalog_2025.tsv	Disease & Phenotype Associations	Disease_and_Phenotype_Associations
+GeDiPNet_2023.tsv	Network-based Associations	Disease_and_Phenotype_Associations
+Human_Phenotype_Ontology.tsv	Disease & Phenotype Associations	Disease_and_Phenotype_Associations
+PheWeb_2019.tsv	Disease & Phenotype Associations	Disease_and_Phenotype_Associations
+Orphanet_Augmented_2021.tsv	Rare Disease Associations	Rare_Disease_Associations
+Rare_Diseases_AutoRIF_Gene_Lists.tsv	Rare Disease Associations	Rare_Disease_Associations
+CellMarker_2024.tsv	Tissue & Cell Type Markers	Tissue_and_Cell_Type_Markers
+Azimuth_2023.tsv	Tissue & Cell Type Markers	Tissue_and_Cell_Type_Markers
+Jensen_TISSUES.tsv	Tissue & Cell Type Markers	Tissue_and_Cell_Type_Markers
+Jensen_COMPARTMENTS.tsv	Cellular Compartments	Cellular_Compartments
+COMPARTMENTS_Curated_2025.tsv	Cellular Compartments	Cellular_Compartments
+InterPro_Domains_2019.tsv	Protein Domains & Complexes	Protein_Domains_and_Complexes
+Pfam_Domains_2019.tsv	Protein Domains & Complexes	Protein_Domains_and_Complexes
+CORUM.tsv	Protein Domains & Complexes	Protein_Domains_and_Complexes
+Rummagene_transcription_factors.tsv	Gene Regulation	Gene_Regulation
+TargetScan_microRNA.tsv	Gene Regulation	Gene_Regulation
+lncHUB_lncRNA_Co-Expression.tsv	Gene Regulation	Gene_Regulation
+TF_Perturbations_Followed_by_Expression.tsv	Gene Regulation	Gene_Regulation
+Epigenomics_Roadmap_HM_ChIP-seq.tsv	Epigenomics	Miscellaneous
+Virus-Host_PPI_P-HIPSTer_2020.tsv	Virus-Host Interactions	Miscellaneous
+HMDB_Metabolites.tsv	Metabolites	Miscellaneous
+ProteomicsDB_2020.tsv	Proteomics	Miscellaneous
+GlyGen_Glycosylated_Proteins_2022.tsv	Post-translational Modifications	Miscellaneous
+Rummagene_kinases.tsv	Kinases	Miscellaneous
+Chromosome_Location.tsv	Genomic Location	Miscellaneous

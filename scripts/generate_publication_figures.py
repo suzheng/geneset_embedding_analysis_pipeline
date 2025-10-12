@@ -237,45 +237,72 @@ def _figure_dimension_filtering(figures_dir: str, sig, formats: List[str]) -> Tu
     idx = np.arange(d)
 
     mask_quant = make_dims_mask("quantile", mean, std, q_low=0.3)
-    mask_topk = make_dims_mask("topk", mean, std, top_k=8)
     threshold = float(np.quantile(std, 0.3))
 
     data_csv_path = os.path.join(figures_dir, "dimension_filtering.data.csv")
     _ensure_dir(data_csv_path)
     with open(data_csv_path, "w", encoding="utf-8") as f:
-        f.write("dim_index,std,mask_quantile,mask_topk\n")
+        f.write("dim_index,std,mask_quantile\n")
         for i in range(d):
-            f.write(f"{i},{float(std[i])},{int(bool(mask_quant[i]))},{int(bool(mask_topk[i]))}\n")
+            f.write(f"{i},{float(std[i])},{int(bool(mask_quant[i]))}\n")
 
-    width_in, height_in = 7.0, 3.4
-    fig, axes = plt.subplots(1, 2, figsize=(width_in, height_in), constrained_layout=True)
+    width_in, height_in = 3.4, 3.4
+    fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
 
     order = np.argsort(std)
     std_sorted = std[order]
-    axes[0].plot(np.arange(d), std_sorted, color="#0072b2", lw=1.5)
-    axes[0].axhline(threshold, color="#d55e00", lw=1.0, ls="--", label=f"Quantile 0.3 thr = {threshold:.3g}")
-    axes[0].set_title(_replace_underscores("Std distribution across dimensions"))
-    axes[0].set_xlabel(_replace_underscores("Sorted dimension index"))
-    axes[0].set_ylabel(_replace_underscores("Std"))
-    axes[0].legend(frameon=False)
+    ax.plot(np.arange(d), std_sorted, color="#0072b2", lw=1.5)
+    ax.axhline(threshold, color="#d55e00", lw=1.0, ls="--", label=f"Quantile 0.3 thr = {threshold:.3g}")
+    ax.set_title(_replace_underscores("Std distribution across dimensions"))
+    ax.set_xlabel(_replace_underscores("Sorted dimension index"))
+    ax.set_ylabel(_replace_underscores("Std"))
+    ax.legend(frameon=False)
 
-    colors = np.array(["#56b4e9"] * d)
-    colors[mask_quant] = "#009e73"
-    axes[1].bar(idx, std, color=colors, width=0.8)
-    axes[1].set_title(_replace_underscores("Dimension filtering (green = selected)"))
-    axes[1].set_xlabel(_replace_underscores("Dimension index"))
-    axes[1].set_ylabel(_replace_underscores("Std"))
-
-    # Panel labels
-    axes[0].text(-0.12, 1.05, "A", transform=axes[0].transAxes, fontsize=9, fontweight="bold")
-    axes[1].text(-0.12, 1.05, "B", transform=axes[1].transAxes, fontsize=9, fontweight="bold")
-
-    for ax in axes:
-        for label in ax.get_xticklabels() + ax.get_yticklabels():
-            label.set_fontsize(7.5)
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(7.5)
 
     _disable_grid(fig)
     saved = _save_figure(fig, figures_dir, "dimension_filtering", formats)
+    plt.close(fig)
+    primary = saved[formats[0]]
+    return primary, data_csv_path
+
+
+def _figure_dimension_filtering_bar(figures_dir: str, sig, formats: List[str]) -> Tuple[str, str]:
+    import matplotlib.pyplot as plt
+    from src.pipeline import make_dims_mask
+
+    std = np.asarray(sig.std, dtype=float)
+    mean = np.asarray(sig.mean, dtype=float)
+    d = std.size
+    idx = np.arange(d)
+
+    mask_quant = make_dims_mask("quantile", mean, std, q_low=0.3)
+
+    data_csv_path = os.path.join(figures_dir, "dimension_filtering_bar.data.csv")
+    _ensure_dir(data_csv_path)
+    with open(data_csv_path, "w", encoding="utf-8") as f:
+        f.write("dim_index,std,mask_quantile\n")
+        for i in range(d):
+            f.write(f"{i},{float(std[i])},{int(bool(mask_quant[i]))}\n")
+
+    # Two column width
+    width_in, height_in = 7.0, 3.4
+    fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
+
+    # Use third color (#009e73) for selected dimensions
+    colors = np.array(["#56b4e9"] * d)
+    colors[mask_quant] = "#d55e00"
+    ax.bar(idx, std, color=colors, width=1.0)
+    ax.set_title(_replace_underscores("Dimension filtering (orange = selected)"))
+    ax.set_xlabel(_replace_underscores("Dimension index"))
+    ax.set_ylabel(_replace_underscores("Std"))
+
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontsize(7.5)
+
+    _disable_grid(fig)
+    saved = _save_figure(fig, figures_dir, "dimension_filtering_bar", formats)
     plt.close(fig)
     primary = saved[formats[0]]
     return primary, data_csv_path
@@ -543,25 +570,21 @@ def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str]) -> Tupl
     fig, axes = plt.subplots(1, 2, figsize=(width_in + 1.0, height_in))
 
     # Heatmap of mean (as single-row image)
-    im0 = axes[0].imshow(mean[np.newaxis, :], aspect="auto", cmap="coolwarm")
+    im0 = axes[0].imshow(mean[np.newaxis, :], aspect="auto", cmap="coolwarm", extent=[1, d+1, 0, 1])
     axes[0].set_title(_replace_underscores("Signature mean by dimension"))
     axes[0].set_yticks([])
     axes[0].set_xlabel(_replace_underscores("Dimension index"))
-    # Overlay selected dims as small markers above
-    y0 = -0.25
-    sel_idx = np.where(mask)[0]
-    axes[0].scatter(sel_idx, [y0] * sel_idx.size, marker="v", s=8, c="#009e73", clip_on=False)
     divider0 = make_axes_locatable(axes[0])
-    cax0 = divider0.append_axes("right", size="2.5%", pad=0.02)
+    cax0 = divider0.append_axes("right", size="2.5%", pad=0.10)
     fig.colorbar(im0, cax=cax0)
 
     # Heatmap of std
-    im1 = axes[1].imshow(std[np.newaxis, :], aspect="auto", cmap="magma")
+    im1 = axes[1].imshow(std[np.newaxis, :], aspect="auto", cmap="magma", extent=[1, d+1, 0, 1])
     axes[1].set_title(_replace_underscores("Signature std by dimension"))
     axes[1].set_yticks([])
     axes[1].set_xlabel(_replace_underscores("Dimension index"))
     divider1 = make_axes_locatable(axes[1])
-    cax1 = divider1.append_axes("right", size="2.5%", pad=0.02)
+    cax1 = divider1.append_axes("right", size="2.5%", pad=0.10)
     fig.colorbar(im1, cax=cax1)
 
     # Panel labels
@@ -583,7 +606,7 @@ def main(argv: List[str] | None = None) -> None:
 
     project_root = _project_root()
     figures_dir = os.path.join(project_root, "figures")
-    embeddings_path = os.path.join(project_root, "data", "GeneRAIN-vec.32d.txt")
+    embeddings_path = os.path.join(project_root, "data", "GeneRAIN-vec.200d.txt")
     precomputed_jsonl = os.path.join(project_root, "precomputed", "ClinVar_2019.signatures.jsonl")
 
     parser = argparse.ArgumentParser(description="Generate publication-quality figures for the pipeline")
@@ -624,6 +647,7 @@ def main(argv: List[str] | None = None) -> None:
     # Pipeline overview removed per user request
     outputs.append(_figure_term_signature_distributions(figures_dir, term_signatures, formats))
     outputs.append(_figure_dimension_filtering(figures_dir, sig, formats))
+    outputs.append(_figure_dimension_filtering_bar(figures_dir, sig, formats))
     outputs.append(_figure_top_matches(figures_dir, sig, term_signatures, formats))
     # Advanced/new figures
     outputs.append(_figure_similarity_distributions(figures_dir, sig, term_signatures, formats))
