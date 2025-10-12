@@ -166,7 +166,7 @@ def _get_workspace() -> str:
     if not workspace:
         # Fallback to current working directory with a warning for reproducibility.
         print(
-            "WARN: PROJECT_WORKSPACE_VOLUME_PATH is not set; using current working directory",
+            # "WARN: PROJECT_WORKSPACE_VOLUME_PATH is not set; using current working directory",
             file=sys.stderr,
         )
         workspace = os.getcwd()
@@ -208,55 +208,53 @@ def _write_text(path: str, text: str) -> None:
         f.write(text)
 
 
-def _write_method_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str) -> str:
+def _write_method_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str, verbose: bool = True) -> str:
     path = os.path.join(output_dir, f"{entity_id}_{pipeline_short}_{step}.METHOD.md")
     _write_text(path, text)
-    _print_output(path, "md", f"{step} methodology")
+    _print_output(path, "md", f"{step} methodology", verbose=verbose)
     return path
 
 
-def _write_shared_method_doc(step: str, text: str) -> str:
+def _write_shared_method_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True) -> str:
     """Write shared methodology that is the same across all runs."""
-    workspace = _get_workspace()
-    shared_dir = os.path.join(workspace, "shared_methods")
+    shared_dir = os.path.join(output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     path = os.path.join(shared_dir, f"SHARED_{step}.METHOD.md")
     _write_text(path, text)
-    _print_output(path, "md", f"Shared {step} methodology")
+    _print_output(path, "md", f"Shared {step} methodology", verbose=verbose)
     return path
 
 
-def _write_run_params_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str) -> str:
+def _write_run_params_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str, verbose: bool = True) -> str:
     """Write run-specific parameters for a methodology step."""
     path = os.path.join(output_dir, f"{entity_id}_{pipeline_short}_{step}.PARAMS.md")
     _write_text(path, text)
-    _print_output(path, "md", f"{step} run parameters")
+    _print_output(path, "md", f"{step} run parameters", verbose=verbose)
     return path
 
 
-def _write_result_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str) -> str:
+def _write_result_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str, verbose: bool = True) -> str:
     path = os.path.join(output_dir, f"{entity_id}_{pipeline_short}_{step}.RESULT.md")
     _write_text(path, text)
-    _print_output(path, "md", f"{step} results")
+    _print_output(path, "md", f"{step} results", verbose=verbose)
     return path
 
 
-def _write_shared_result_doc(step: str, text: str) -> str:
+def _write_shared_result_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True) -> str:
     """Write shared result interpretation that is the same across all runs."""
-    workspace = _get_workspace()
-    shared_dir = os.path.join(workspace, "shared_methods")
+    shared_dir = os.path.join(output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     path = os.path.join(shared_dir, f"SHARED_{step}.RESULT_INTERPRETATION.md")
     _write_text(path, text)
-    _print_output(path, "md", f"Shared {step} result interpretation")
+    _print_output(path, "md", f"Shared {step} result interpretation", verbose=verbose)
     return path
 
 
-def _write_run_results_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str) -> str:
+def _write_run_results_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str, verbose: bool = True) -> str:
     """Write run-specific numerical results."""
     path = os.path.join(output_dir, f"{entity_id}_{pipeline_short}_{step}.RESULTS.md")
     _write_text(path, text)
-    _print_output(path, "md", f"{step} numerical results")
+    _print_output(path, "md", f"{step} numerical results", verbose=verbose)
     return path
 
 
@@ -285,9 +283,114 @@ def _write_csv(path: str, header: List[str], rows: List[List[Any]]) -> None:
             writer.writerow(r)
 
 
-def _print_output(path: str, ftype: str, desc: str) -> None:
-    abs_path = os.path.abspath(path)
-    print(f"OUTPUT: file={abs_path} type={ftype} desc=\"{desc}\"")
+def _print_output(path: str, ftype: str, desc: str, verbose: bool = True) -> None:
+    """Print output file information.
+    
+    Args:
+        path: File path
+        ftype: File type (csv, json, md)
+        desc: Description
+        verbose: If False, suppress output (default True for backward compatibility)
+    """
+    if verbose:
+        abs_path = os.path.abspath(path)
+        print(f"OUTPUT: file={abs_path} type={ftype} desc=\"{desc}\"")
+
+
+def _generate_figures(
+    figures_dir: str,
+    sig: Signature,
+    term_signatures: Optional[List[TermSignature]],
+    formats: List[str],
+    entity_id: str,
+    library_name: str = "",
+    verbose: bool = True
+) -> List[str]:
+    """Generate publication-quality figures for the analysis.
+    
+    Returns list of paths to generated figure files.
+    """
+    try:
+        import matplotlib
+        matplotlib.use('Agg')  # Non-interactive backend
+        import matplotlib.pyplot as plt
+        from scripts.generate_publication_figures import (
+            _configure_matplotlib,
+            _figure_term_signature_distributions,
+            _figure_dimension_filtering,
+            _figure_dimension_filtering_bar,
+            _figure_top_matches,
+            _figure_similarity_distributions,
+            _figure_distance_cosine_hexbin,
+            _figure_pca_term_space,
+            _figure_signature_heatmap,
+        )
+        
+        _configure_matplotlib()
+        
+        figure_paths: List[str] = []
+        
+        # Generate figures without progress messages (they're described in initial stdout)
+        if term_signatures and len(term_signatures) > 0:
+            fig_path, data_path = _figure_term_signature_distributions(figures_dir, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+        
+        fig_path, data_path = _figure_dimension_filtering(figures_dir, sig, formats, library_name)
+        figure_paths.extend([fig_path, data_path])
+        
+        fig_path, data_path = _figure_dimension_filtering_bar(figures_dir, sig, formats, library_name)
+        figure_paths.extend([fig_path, data_path])
+        
+        if term_signatures and len(term_signatures) > 0:
+            fig_path, data_path = _figure_top_matches(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+            
+            fig_path, data_path = _figure_similarity_distributions(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+            
+            fig_path, data_path = _figure_distance_cosine_hexbin(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+            
+            fig_path, data_path = _figure_pca_term_space(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+        
+        fig_path, data_path = _figure_signature_heatmap(figures_dir, sig, formats, library_name)
+        figure_paths.extend([fig_path, data_path])
+        
+        # Create index file
+        index_path = os.path.join(figures_dir, f"{entity_id}_figure_index.json")
+        import json
+        with open(index_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "entity_id": entity_id,
+                "figures_directory": os.path.abspath(figures_dir),
+                "figure_files": [os.path.abspath(p) for p in figure_paths],
+                "formats": formats,
+                "description": {
+                    "term_signatures_distributions": "Distribution of gene coverage across precomputed term signatures",
+                    "dimension_filtering": "Standard deviation distribution across embedding dimensions",
+                    "dimension_filtering_bar": "Bar chart showing selected vs filtered dimensions",
+                    "top_matches_example": "Top matching terms from the reference library",
+                    "similarity_distributions": "Distribution of distance and cosine similarity scores",
+                    "distance_cosine_hexbin": "2D density plot of distance vs cosine similarity",
+                    "pca_term_space": "PCA projection of term signatures with top matches highlighted",
+                    "signature_heatmap": "Heatmap of signature mean and std vectors",
+                }
+            }, f, indent=2)
+        figure_paths.append(index_path)
+        
+        # Brief summary without detailed descriptions (already shown in initial output)
+        if verbose:
+            print(f"  Generated {len(figure_paths)} figure and data files")
+        
+        return figure_paths
+        
+    except ImportError as e:
+        print(f"WARNING: Could not generate figures - missing dependency: {e}")
+        return []
+    except Exception as e:
+        print(f"WARNING: Figure generation failed: {e}")
+        return []
 
 
 def geneset_embedding(
@@ -309,6 +412,9 @@ def geneset_embedding(
     enable_clustering: bool = True,
     cluster_min_genes: int = 20,
     random_state: int = 17,
+    verbose_output: bool = True,
+    generate_figures: bool = False,
+    figure_formats: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Production-oriented pipeline for gene set embedding matching with flexible inputs.
@@ -322,11 +428,13 @@ def geneset_embedding(
         raise ValueError("ERROR: Invalid entity_id; field=entity_id; expected=alphanumeric/_/-")
 
     pipeline_short = "geneset_embed"
-    folder_name = output_folder or generate_output_folder(clean_id, pipeline_short)
+    # If output_folder not specified, use current_working_directory/{entity_id}
+    folder_name = output_folder or clean_id
     output_dir = get_output_path(folder_name)
     os.makedirs(output_dir, exist_ok=True)
 
-    print(f"INFO: embeddings_path={os.path.abspath(embeddings_path)} entity_id={clean_id}")
+    if verbose_output:
+        print(f"INFO: embeddings_path={os.path.abspath(embeddings_path)} entity_id={clean_id}")
 
     # Determine steps
     all_steps = [
@@ -383,7 +491,7 @@ def geneset_embedding(
             "This approach highlights the distinctive features of the input gene set relative to the reference. "
             "Clustering is automatically disabled in differential mode to maintain a single comparative signature.\n\n"
         )
-        _write_shared_method_doc("preprocess", shared_method_text)
+        _write_shared_method_doc(clean_id, output_dir, "preprocess", shared_method_text, verbose=verbose_output)
         
         # Run-specific parameters
         hdbscan_text = ""
@@ -412,7 +520,7 @@ def geneset_embedding(
             params_text += f"- **Reference genes provided**: {len(ref_genes_list)}\n"
         params_text += "\n"
         
-        _write_run_params_doc(output_dir, clean_id, pipeline_short, "preprocess", params_text)
+        _write_run_params_doc(output_dir, clean_id, pipeline_short, "preprocess", params_text, verbose=verbose_output)
 
         n_genes = len(samples[0].get('genes', [])) if samples else 0
         
@@ -421,7 +529,7 @@ def geneset_embedding(
             f"## Data Preprocessing Results\n\n"
             f"- **Input genes**: {n_genes}\n\n"
         )
-        _write_run_results_doc(output_dir, clean_id, pipeline_short, "preprocess", result_text)
+        _write_run_results_doc(output_dir, clean_id, pipeline_short, "preprocess", result_text, verbose=verbose_output)
 
     # Per-sample processing
     per_sample_qc_rows: List[List[Any]] = []
@@ -434,6 +542,7 @@ def geneset_embedding(
     signature_files: List[str] = []
     term_matching_files: List[str] = []
     sample_match_summaries: List[str] = []
+    total_files_written = 0  # Track all files written for accurate count
 
     for s in samples:
         sid = s["sample_id"]
@@ -472,7 +581,8 @@ def geneset_embedding(
                 # Skip clustering in differential mode
                 sample_sig = compute_differential_signature(vectors, ref_vectors, n_requested=len(genes))
                 groups = [vectors]  # Single group for consistency
-                print(f"INFO: Differential mode for {sid} - input: {len(found)}, reference: {len(ref_found)}")
+                if verbose_output:
+                    print(f"INFO: Differential mode for {sid} - input: {len(found)}, reference: {len(ref_found)}")
             else:
                 # Standard mode: cluster and compute signatures
                 groups = maybe_cluster_vectors(
@@ -491,9 +601,10 @@ def geneset_embedding(
                     float(sample_sig.coverage),
                     int(len(groups)),
                 ])
-                print(
-                    f"STEP: qc done sample={sid} n_input={len(genes)} n_found={len(found)} n_missing={len(missing)} dims={d} clusters={len(groups)}"
-                )
+                if verbose_output:
+                    print(
+                        f"STEP: qc done sample={sid} n_input={len(genes)} n_found={len(found)} n_missing={len(missing)} dims={d} clusters={len(groups)}"
+                    )
 
             # Save signature JSON for the sample
             if "signature" in steps_set:
@@ -510,11 +621,12 @@ def geneset_embedding(
                     "std": sample_sig.std.astype(float).tolist(),
                 }
                 write_json(sig_path, sig_payload)
-                _print_output(sig_path, "json", f"Sample signature for {sid}")
+                _print_output(sig_path, "json", f"Sample signature for {sid}", verbose=verbose_output)
                 artifacts.append(os.path.abspath(sig_path))
-                print(
-                    f"STEP: signature done sample={sid} d={d}"
-                )
+                if verbose_output:
+                    print(
+                        f"STEP: signature done sample={sid} d={d}"
+                    )
                 signature_files.append(os.path.abspath(sig_path))
 
             # Cohort matrix row
@@ -542,11 +654,12 @@ def geneset_embedding(
             for t, dist, cos in ranked:
                 rows.append([t.term_id, t.library, t.term, f"{dist:.6g}", f"{cos:.6g}", t.n_found, f"{t.coverage:.3g}"])
             _write_csv(match_csv, rows[0], rows[1:])
-            _print_output(match_csv, "csv", f"Top term matches for {sid}")
+            _print_output(match_csv, "csv", f"Top term matches for {sid}", verbose=verbose_output)
             artifacts.append(os.path.abspath(match_csv))
-            print(
-                f"STEP: term_matching done sample={sid} top_k={min(top_k, len(ranked))}"
-            )
+            if verbose_output:
+                print(
+                    f"STEP: term_matching done sample={sid} top_k={min(top_k, len(ranked))}"
+                )
             term_matching_files.append(os.path.abspath(match_csv))
             # Summarize top-3 terms for results doc
             preview = ", ".join([f"{t.term[:40]} (d={dist:.3g}, cos={cos:.3g})" for t, dist, cos in ranked[:3]])
@@ -560,7 +673,7 @@ def geneset_embedding(
             ["sample_id", "n_input_genes", "n_found", "n_missing", "coverage", "n_clusters"],
             per_sample_qc_rows,
         )
-        _print_output(qc_csv, "csv", "Per-sample QC summary")
+        _print_output(qc_csv, "csv", "Per-sample QC summary", verbose=verbose_output)
         artifacts.append(os.path.abspath(qc_csv))
         
         # Shared QC methodology
@@ -584,7 +697,7 @@ def geneset_embedding(
             "better-defined clusters). Only solutions with silhouette score > 0.35 and minimum cluster size > 2 genes "
             "are accepted. When clustering conditions are not met or fail, all genes are treated as a single group.\n\n"
         )
-        _write_shared_method_doc("qc", shared_method_qc)
+        _write_shared_method_doc(clean_id, output_dir, "qc", shared_method_qc, verbose=verbose_output)
         
         # Run-specific QC parameters
         params_qc = (
@@ -595,7 +708,7 @@ def geneset_embedding(
             f"- **Minimum genes for clustering**: {cluster_min_genes}\n"
             f"- **Random state**: {random_state}\n\n"
         )
-        _write_run_params_doc(output_dir, clean_id, pipeline_short, "qc", params_qc)
+        _write_run_params_doc(output_dir, clean_id, pipeline_short, "qc", params_qc, verbose=verbose_output)
         # RESULT.md for QC
         n_s = len(per_sample_qc_rows)
         total_input = sum(int(r[1]) for r in per_sample_qc_rows)
@@ -620,7 +733,7 @@ def geneset_embedding(
             "Conversely, when no clustering structure is detected (all genes form a single group), this indicates "
             "functional homogeneity, suggesting the genes are coherently related to a unified biological function.\n\n"
         )
-        _write_shared_result_doc("qc", shared_result_qc)
+        _write_shared_result_doc(clean_id, output_dir, "qc", shared_result_qc, verbose=verbose_output)
         
         # Run-specific QC results
         result_text_qc = (
@@ -654,17 +767,18 @@ def geneset_embedding(
         else:
             result_text_qc += f"- **Status**: Clustering disabled\n\n"
         
-        _write_run_results_doc(output_dir, clean_id, pipeline_short, "qc", result_text_qc)
+        _write_run_results_doc(output_dir, clean_id, pipeline_short, "qc", result_text_qc, verbose=verbose_output)
 
     # Cohort integration (matrix)
     if cohort_signature_matrix and "cohort_integration" in steps_set:
         cohort_csv = os.path.join(output_dir, f"{clean_id}_{pipeline_short}_cohort_signatures.csv")
         _write_csv(cohort_csv, cohort_header, cohort_signature_matrix)
-        _print_output(cohort_csv, "csv", "Cohort signature means (rows=samples, cols=dims)")
+        _print_output(cohort_csv, "csv", "Cohort signature means (rows=samples, cols=dims)", verbose=verbose_output)
         artifacts.append(os.path.abspath(cohort_csv))
-        print(
-            f"STEP: cohort_integration done n_samples={len(cohort_signature_matrix)} dims={d}"
-        )
+        if verbose_output:
+            print(
+                f"STEP: cohort_integration done n_samples={len(cohort_signature_matrix)} dims={d}"
+            )
         # Shared cohort integration methodology
         shared_method_ci = (
             "## Multi-Sample Integration\n\n"
@@ -681,7 +795,7 @@ def geneset_embedding(
             "the interpretability of the original embedding space coordinates. For visualization purposes "
             "(e.g., PCA, t-SNE, UMAP), post-hoc standardization can be applied if needed.\n\n"
         )
-        _write_shared_method_doc("cohort_integration", shared_method_ci)
+        _write_shared_method_doc(clean_id, output_dir, "cohort_integration", shared_method_ci, verbose=verbose_output)
         
         # Run-specific parameters
         params_ci = (
@@ -690,7 +804,7 @@ def geneset_embedding(
             f"- **Embedding dimensions (D)**: {d}\n"
             f"- **Matrix shape**: ({len(cohort_signature_matrix)}, {d})\n\n"
         )
-        _write_run_params_doc(output_dir, clean_id, pipeline_short, "cohort_integration", params_ci)
+        _write_run_params_doc(output_dir, clean_id, pipeline_short, "cohort_integration", params_ci, verbose=verbose_output)
         # Shared cohort integration result interpretation
         shared_result_ci = (
             "## Multi-Sample Integration Result Interpretation\n\n"
@@ -704,7 +818,7 @@ def geneset_embedding(
             "Matrix statistics (mean, SD, range) provide a summary of the overall embedding distribution "
             "and can be used to assess data quality and detect potential issues.\n\n"
         )
-        _write_shared_result_doc("cohort_integration", shared_result_ci)
+        _write_shared_result_doc(clean_id, output_dir, "cohort_integration", shared_result_ci, verbose=verbose_output)
         
         # Run-specific cohort integration results
         result_text_ci = (
@@ -723,7 +837,7 @@ def geneset_embedding(
             )
         
         result_text_ci += "\n"
-        _write_run_results_doc(output_dir, clean_id, pipeline_short, "cohort_integration", result_text_ci)
+        _write_run_results_doc(output_dir, clean_id, pipeline_short, "cohort_integration", result_text_ci, verbose=verbose_output)
 
     # METHOD/RESULT for signature step (after collecting signature files)
     if 'signature_files' in locals() and signature_files and "signature" in steps_set:
@@ -748,7 +862,7 @@ def geneset_embedding(
             "genes are coherent. To ensure numerical stability in downstream distance calculations, σ_d values "
             "below 1×10⁻⁸ are clamped to this minimum threshold.\n\n"
         )
-        _write_shared_method_doc("signature", shared_method_sig)
+        _write_shared_method_doc(clean_id, output_dir, "signature", shared_method_sig, verbose=verbose_output)
         
         # Run-specific parameters
         params_sig = (
@@ -759,7 +873,7 @@ def geneset_embedding(
             f"- **Random state**: {random_state}\n"
             f"- **Numerical stability threshold (ε)**: 1×10⁻⁸\n\n"
         )
-        _write_run_params_doc(output_dir, clean_id, pipeline_short, "signature", params_sig)
+        _write_run_params_doc(output_dir, clean_id, pipeline_short, "signature", params_sig, verbose=verbose_output)
         
         # Shared signature result interpretation
         shared_result_sig = (
@@ -773,7 +887,7 @@ def geneset_embedding(
             "Coverage indicates the fraction of input genes with available embeddings. High coverage (>80%) suggests "
             "comprehensive representation, while lower coverage may warrant inspection of missing genes.\n\n"
         )
-        _write_shared_result_doc("signature", shared_result_sig)
+        _write_shared_result_doc(clean_id, output_dir, "signature", shared_result_sig, verbose=verbose_output)
         
         # Calculate signature statistics across all samples
         n_sigs = len(signature_files)
@@ -789,13 +903,13 @@ def geneset_embedding(
             all_n_found = [s.get('signature').n_genes for s in samples if s.get('signature') is not None]
             if all_coverages:
                 mean_cov = np.mean(all_coverages)
-                result_text_sig += (
+        result_text_sig += (
                     f"- **Average genes per signature**: {np.mean(all_n_found):.0f}\n"
                     f"- **Mean coverage**: {mean_cov * 100:.1f}%\n"
                 )
         
         result_text_sig += "\n"
-        _write_run_results_doc(output_dir, clean_id, pipeline_short, "signature", result_text_sig)
+        _write_run_results_doc(output_dir, clean_id, pipeline_short, "signature", result_text_sig, verbose=verbose_output)
 
     # METHOD/RESULT for term matching step
     if 'term_matching_files' in locals() and term_matching_files and "term_matching" in steps_set:
@@ -838,7 +952,7 @@ def geneset_embedding(
             "with cosine similarity used as a secondary criterion for tie-breaking. The top K most similar "
             "terms are retained for interpretation.\n\n"
         )
-        _write_shared_method_doc("term_matching", shared_method_tm)
+        _write_shared_method_doc(clean_id, output_dir, "term_matching", shared_method_tm, verbose=verbose_output)
         
         # Run-specific parameters (this is where library-specific info goes)
         params_tm = (
@@ -870,7 +984,7 @@ def geneset_embedding(
             f"- **Ranking metric**: Variance-weighted distance (primary), cosine similarity (tie-breaker)\n\n"
         )
         
-        _write_run_params_doc(output_dir, clean_id, pipeline_short, "term_matching", params_tm)
+        _write_run_params_doc(output_dir, clean_id, pipeline_short, "term_matching", params_tm, verbose=verbose_output)
         
         # Shared term matching result interpretation
         shared_result_tm = (
@@ -890,7 +1004,7 @@ def geneset_embedding(
             "- Low coverage or quality issues in the query gene set\n\n"
             "Coverage of matched terms indicates how well-represented those terms are in the embedding space.\n\n"
         )
-        _write_shared_result_doc("term_matching", shared_result_tm)
+        _write_shared_result_doc(clean_id, output_dir, "term_matching", shared_result_tm, verbose=verbose_output)
         
         # Run-specific term matching results
         library_name = "unknown"
@@ -913,7 +1027,7 @@ def geneset_embedding(
                 result_text_tm += f"\n*Showing {min(5, len(sample_match_summaries))} of {len(sample_match_summaries)} samples*\n"
         
         result_text_tm += "\n"
-        _write_run_results_doc(output_dir, clean_id, pipeline_short, "term_matching", result_text_tm)
+        _write_run_results_doc(output_dir, clean_id, pipeline_short, "term_matching", result_text_tm, verbose=verbose_output)
 
     # Group comparison step not supported in single-sample mode
 
@@ -940,11 +1054,55 @@ def geneset_embedding(
     }
     run_info_path = os.path.join(output_dir, f"{clean_id}_{pipeline_short}_run_info.json")
     write_json(run_info_path, run_info)
-    _print_output(run_info_path, "json", "Run information and parameters")
+    _print_output(run_info_path, "json", "Run information and parameters", verbose=verbose_output)
     artifacts.append(os.path.abspath(run_info_path))
 
+    # Generate figures if requested
+    figure_paths: List[str] = []
+    if generate_figures and samples and samples[0].get("signature") is not None:
+        figures_dir = os.path.join(output_dir, "figures")
+        os.makedirs(figures_dir, exist_ok=True)
+        
+        if figure_formats is None:
+            figure_formats = ["svg", "png"]
+        
+        sample_sig = samples[0]["signature"]
+        
+        # Extract and clean library name for figure titles
+        lib_name = ""
+        if precomputed_terms_jsonl:
+            lib_name = os.path.basename(precomputed_terms_jsonl).replace('.signatures.jsonl', '')
+            # Import clean_library_name from generate_publication_figures
+            from scripts.generate_publication_figures import clean_library_name
+            lib_name = clean_library_name(lib_name)
+        
+        # Generate figures (descriptions already shown in initial output)
+        figure_paths = _generate_figures(
+            figures_dir, 
+            sample_sig, 
+            term_signatures, 
+            figure_formats,
+            clean_id,
+            lib_name,
+            verbose_output
+        )
+        artifacts.extend(figure_paths)
+
+    # If verbose is off, print a summary line
+    if not verbose_output:
+        library_name = "unknown"
+        if precomputed_terms_jsonl:
+            library_name = os.path.basename(precomputed_terms_jsonl).replace('.signatures.jsonl', '')
+        
+        # Count all files in the output directory
+        total_files = 0
+        for root, dirs, files in os.walk(output_dir):
+            total_files += len(files)
+        
+        print(f"✓ {total_files} result files for library {library_name} have been output to {os.path.abspath(output_dir)}")
+    
     print(
         f"DONE: success=true output_dir={os.path.abspath(output_dir)} artifacts={len(artifacts)}"
     )
-    return {"success": True, "run_info": run_info, "artifacts": artifacts}
+    return {"success": True, "run_info": run_info, "artifacts": artifacts, "figures": figure_paths}
 

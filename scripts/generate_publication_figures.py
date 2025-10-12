@@ -19,6 +19,43 @@ def _replace_underscores(text: str) -> str:
     return (text or "").replace("_", " ")
 
 
+def clean_library_name(library_name: str) -> str:
+    """
+    Clean library name for display in figures.
+    
+    - Replace underscores with spaces
+    - Remove trailing _YYYY (year patterns like _2019, _2024)
+    
+    Args:
+        library_name: Raw library name (e.g., "BioPlanet_2019" or "Reactome_Pathways_2024")
+        
+    Returns:
+        Cleaned library name (e.g., "BioPlanet" or "Reactome Pathways")
+    """
+    import re
+    # Remove trailing _YYYY pattern (year from 1900 to 2099)
+    cleaned = re.sub(r'_\d{4}$', '', library_name)
+    # Replace remaining underscores with spaces
+    cleaned = cleaned.replace("_", " ")
+    return cleaned
+
+
+def wrap_title(title: str, max_chars_per_line: int = 60) -> str:
+    """
+    Wrap title text to prevent it from being too long.
+    
+    Args:
+        title: The title text to wrap
+        max_chars_per_line: Maximum characters per line
+        
+    Returns:
+        Title with newlines inserted for wrapping
+    """
+    import textwrap
+    lines = textwrap.wrap(title, width=max_chars_per_line)
+    return "\n".join(lines)
+
+
 def _configure_matplotlib() -> None:
     import matplotlib as mpl
     mpl.rcParams["pdf.fonttype"] = 42
@@ -179,7 +216,7 @@ def _figure_pipeline_overview(figures_dir: str, formats: List[str]) -> Tuple[str
     return primary, data_json_path
 
 
-def _figure_term_signature_distributions(figures_dir: str, term_signatures, formats: List[str]) -> Tuple[str, str]:
+def _figure_term_signature_distributions(figures_dir: str, term_signatures, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     n_found = np.array([int(t.n_found) for t in term_signatures], dtype=np.int64)
     coverage = np.array([float(t.coverage) for t in term_signatures], dtype=np.float64)
@@ -203,13 +240,16 @@ def _figure_term_signature_distributions(figures_dir: str, term_signatures, form
         axes[0].hist(n_found, bins=30, color="#0072b2", edgecolor="#333333")
         axes[1].hist(coverage, bins=30, color="#d55e00", edgecolor="#333333")
 
-    axes[0].set_title(_replace_underscores("Term signature genes found"))
+    # Move "Term signature genes found" to y-axis, decrease title width
+    if library_name:
+        axes[0].set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=35))
     axes[0].set_xlabel(_replace_underscores("Genes found per term"))
-    axes[0].set_ylabel(_replace_underscores("Count"))
+    axes[0].set_ylabel(_replace_underscores("Term signature genes found"))
 
-    axes[1].set_title(_replace_underscores("Term signature coverage"))
+    if library_name:
+        axes[1].set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=35))
     axes[1].set_xlabel(_replace_underscores("Coverage"))
-    axes[1].set_ylabel(_replace_underscores("Count"))
+    axes[1].set_ylabel(_replace_underscores("Term signature genes found"))
     axes[1].set_xlim(0.0, 1.0)
 
     # Panel labels
@@ -227,7 +267,7 @@ def _figure_term_signature_distributions(figures_dir: str, term_signatures, form
     return primary, data_csv_path
 
 
-def _figure_dimension_filtering(figures_dir: str, sig, formats: List[str]) -> Tuple[str, str]:
+def _figure_dimension_filtering(figures_dir: str, sig, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from src.pipeline import make_dims_mask
 
@@ -253,7 +293,9 @@ def _figure_dimension_filtering(figures_dir: str, sig, formats: List[str]) -> Tu
     std_sorted = std[order]
     ax.plot(np.arange(d), std_sorted, color="#0072b2", lw=1.5)
     ax.axhline(threshold, color="#d55e00", lw=1.0, ls="--", label=f"Quantile 0.3 thr = {threshold:.3g}")
-    ax.set_title(_replace_underscores("Std distribution across dimensions"))
+    # Only show library name in title
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=40))
     ax.set_xlabel(_replace_underscores("Sorted dimension index"))
     ax.set_ylabel(_replace_underscores("Std"))
     ax.legend(frameon=False)
@@ -268,7 +310,7 @@ def _figure_dimension_filtering(figures_dir: str, sig, formats: List[str]) -> Tu
     return primary, data_csv_path
 
 
-def _figure_dimension_filtering_bar(figures_dir: str, sig, formats: List[str]) -> Tuple[str, str]:
+def _figure_dimension_filtering_bar(figures_dir: str, sig, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from src.pipeline import make_dims_mask
 
@@ -294,7 +336,8 @@ def _figure_dimension_filtering_bar(figures_dir: str, sig, formats: List[str]) -
     colors = np.array(["#56b4e9"] * d)
     colors[mask_quant] = "#d55e00"
     ax.bar(idx, std, color=colors, width=1.0)
-    ax.set_title(_replace_underscores("Dimension filtering (orange = selected)"))
+    lib_suffix = f" ({library_name})" if library_name else ""
+    ax.set_title(wrap_title(_replace_underscores(f"Dimension filtering (orange = selected){lib_suffix}")))
     ax.set_xlabel(_replace_underscores("Dimension index"))
     ax.set_ylabel(_replace_underscores("Std"))
 
@@ -308,7 +351,7 @@ def _figure_dimension_filtering_bar(figures_dir: str, sig, formats: List[str]) -
     return primary, data_csv_path
 
 
-def _figure_top_matches(figures_dir: str, sig, term_signatures, formats: List[str]) -> Tuple[str, str]:
+def _figure_top_matches(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from src.pipeline import match_input_to_terms
 
@@ -341,7 +384,8 @@ def _figure_top_matches(figures_dir: str, sig, term_signatures, formats: List[st
             )
 
     width_in, height_in = 3.4, 4.5
-    fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
+    # Use tight_layout instead of constrained_layout to avoid warning with subplots_adjust
+    fig, ax = plt.subplots(figsize=(width_in, height_in))
 
     # Wrap or truncate long labels to avoid overflow
     labels_raw = [r[0].term for r in top]
@@ -353,10 +397,13 @@ def _figure_top_matches(figures_dir: str, sig, term_signatures, formats: List[st
     ax.barh(y, distances, color="#0072b2")
     ax.invert_yaxis()
     ax.set_xlabel(_replace_underscores("Variance weighted distance"))
-    ax.set_ylabel("")
+    # Move "Top matches" to y-axis label
+    ax.set_ylabel(_replace_underscores("Top matches"))
     ax.set_yticks(y)
     ax.set_yticklabels([_replace_underscores(l) for l in labels], fontsize=7.5)
-    ax.set_title(_replace_underscores("Top matches for sample signature"))
+    # Only keep library name in title, reduce title width
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=35))
 
     # Removed cosine annotations per request; values remain in data CSV
 
@@ -373,7 +420,7 @@ def _figure_top_matches(figures_dir: str, sig, term_signatures, formats: List[st
     return primary, data_csv_path
 
 
-def _figure_similarity_distributions(figures_dir: str, sig, term_signatures, formats: List[str]) -> Tuple[str, str]:
+def _figure_similarity_distributions(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     try:
         import seaborn as sns  # type: ignore
@@ -398,12 +445,16 @@ def _figure_similarity_distributions(figures_dir: str, sig, term_signatures, for
 
     width_in, height_in = 7.0, 3.4
     fig, axes = plt.subplots(1, 2, figsize=(width_in, height_in), constrained_layout=True)
-
+    
     if sns is not None:
         sns.histplot(distances, bins=50, ax=axes[0], color="#0072b2", kde=True, stat="density")
     else:
         axes[0].hist(distances, bins=50, color="#0072b2", edgecolor="#333333", density=True)
-    axes[0].set_title(_replace_underscores("Distance distribution across all terms"))
+    # Remove "distribution" from title, decrease title width
+    if library_name:
+        axes[0].set_title(wrap_title(_replace_underscores(f"Distance ({library_name})"), max_chars_per_line=35))
+    else:
+        axes[0].set_title(_replace_underscores("Distance"))
     axes[0].set_xlabel(_replace_underscores("Variance weighted distance"))
     axes[0].set_ylabel(_replace_underscores("Density"))
 
@@ -411,7 +462,11 @@ def _figure_similarity_distributions(figures_dir: str, sig, term_signatures, for
         sns.histplot(cosines, bins=50, ax=axes[1], color="#d55e00", kde=True, stat="density")
     else:
         axes[1].hist(cosines, bins=50, color="#d55e00", edgecolor="#333333", density=True)
-    axes[1].set_title(_replace_underscores("Cosine similarity distribution across all terms"))
+    # Remove "distribution" from title, decrease title width
+    if library_name:
+        axes[1].set_title(wrap_title(_replace_underscores(f"Cosine similarity ({library_name})"), max_chars_per_line=35))
+    else:
+        axes[1].set_title(_replace_underscores("Cosine similarity"))
     axes[1].set_xlabel(_replace_underscores("Cosine similarity"))
     axes[1].set_ylabel(_replace_underscores("Density"))
     axes[1].set_xlim(-1.0, 1.0)
@@ -431,7 +486,7 @@ def _figure_similarity_distributions(figures_dir: str, sig, term_signatures, for
     return primary, data_csv_path
 
 
-def _figure_distance_cosine_hexbin(figures_dir: str, sig, term_signatures, formats: List[str], top_k: int = 15) -> Tuple[str, str]:
+def _figure_distance_cosine_hexbin(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "", top_k: int = 15) -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from src.pipeline import match_input_to_terms
     from src.match import variance_weighted_distance, cosine_similarity
@@ -475,7 +530,9 @@ def _figure_distance_cosine_hexbin(figures_dir: str, sig, term_signatures, forma
         label=_replace_underscores("Top matches"),
     )
 
-    ax.set_title(_replace_underscores("Distance vs cosine hexbin"))
+    # Only show library name in title
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=40))
     ax.set_xlabel(_replace_underscores("Variance weighted distance"))
     ax.set_ylabel(_replace_underscores("Cosine similarity"))
     ax.set_ylim(-1.0, 1.0)
@@ -488,7 +545,7 @@ def _figure_distance_cosine_hexbin(figures_dir: str, sig, term_signatures, forma
     return primary, data_csv_path
 
 
-def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List[str], top_k: int = 20) -> Tuple[str, str]:
+def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "", top_k: int = 20) -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from sklearn.decomposition import PCA
     from src.pipeline import match_input_to_terms
@@ -537,7 +594,9 @@ def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List
             label=_replace_underscores("Top matches"),
         )
 
-    ax.set_title(_replace_underscores("PCA of term means (top matches highlighted)"))
+    # Only show library name in title
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=40))
     ax.set_xlabel("PC1")
     ax.set_ylabel("PC2")
     ax.legend(loc="best", frameon=False)
@@ -549,7 +608,7 @@ def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List
     return primary, data_csv_path
 
 
-def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str]) -> Tuple[str, str]:
+def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str], library_name: str = "") -> Tuple[str, str]:
     import matplotlib.pyplot as plt
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     from src.pipeline import make_dims_mask
@@ -568,10 +627,14 @@ def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str]) -> Tupl
     width_in, height_in = 7.0, 2.8
     # Wider figure and explicit margins to prevent colorbar label cutoff
     fig, axes = plt.subplots(1, 2, figsize=(width_in + 1.0, height_in))
-
+    
     # Heatmap of mean (as single-row image)
     im0 = axes[0].imshow(mean[np.newaxis, :], aspect="auto", cmap="coolwarm", extent=[1, d+1, 0, 1])
-    axes[0].set_title(_replace_underscores("Signature mean by dimension"))
+    # Remove "by dimension" from title, decrease title width
+    if library_name:
+        axes[0].set_title(wrap_title(_replace_underscores(f"Signature mean ({library_name})"), max_chars_per_line=35))
+    else:
+        axes[0].set_title(_replace_underscores("Signature mean"))
     axes[0].set_yticks([])
     axes[0].set_xlabel(_replace_underscores("Dimension index"))
     divider0 = make_axes_locatable(axes[0])
@@ -580,7 +643,11 @@ def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str]) -> Tupl
 
     # Heatmap of std
     im1 = axes[1].imshow(std[np.newaxis, :], aspect="auto", cmap="magma", extent=[1, d+1, 0, 1])
-    axes[1].set_title(_replace_underscores("Signature std by dimension"))
+    # Remove "by dimension" from title, decrease title width
+    if library_name:
+        axes[1].set_title(wrap_title(_replace_underscores(f"Signature std ({library_name})"), max_chars_per_line=35))
+    else:
+        axes[1].set_title(_replace_underscores("Signature std"))
     axes[1].set_yticks([])
     axes[1].set_xlabel(_replace_underscores("Dimension index"))
     divider1 = make_axes_locatable(axes[1])
@@ -591,8 +658,8 @@ def _figure_signature_heatmap(figures_dir: str, sig, formats: List[str]) -> Tupl
     axes[0].text(-0.08, 1.05, "A", transform=axes[0].transAxes, fontsize=9, fontweight="bold")
     axes[1].text(-0.08, 1.05, "B", transform=axes[1].transAxes, fontsize=9, fontweight="bold")
 
-    # Adjust margins to prevent text cutoff on right
-    plt.subplots_adjust(left=0.08, right=0.90, top=0.90, bottom=0.18)
+    # Adjust margins - increase top margin to 0.85 for more space, prevent text cutoff on right
+    plt.subplots_adjust(left=0.08, right=0.90, top=0.85, bottom=0.18)
 
     _disable_grid(fig)
     saved = _save_figure(fig, figures_dir, "signature_heatmap", formats)
@@ -643,17 +710,23 @@ def main(argv: List[str] | None = None) -> None:
             indent=2,
         )
 
+    # Extract library name from precomputed_jsonl
+    library_name = ""
+    if precomputed_jsonl:
+        library_name = os.path.basename(precomputed_jsonl).replace('.signatures.jsonl', '')
+        library_name = clean_library_name(library_name)
+    
     outputs: List[Tuple[str, str]] = []
     # Pipeline overview removed per user request
-    outputs.append(_figure_term_signature_distributions(figures_dir, term_signatures, formats))
-    outputs.append(_figure_dimension_filtering(figures_dir, sig, formats))
-    outputs.append(_figure_dimension_filtering_bar(figures_dir, sig, formats))
-    outputs.append(_figure_top_matches(figures_dir, sig, term_signatures, formats))
+    outputs.append(_figure_term_signature_distributions(figures_dir, term_signatures, formats, library_name))
+    outputs.append(_figure_dimension_filtering(figures_dir, sig, formats, library_name))
+    outputs.append(_figure_dimension_filtering_bar(figures_dir, sig, formats, library_name))
+    outputs.append(_figure_top_matches(figures_dir, sig, term_signatures, formats, library_name))
     # Advanced/new figures
-    outputs.append(_figure_similarity_distributions(figures_dir, sig, term_signatures, formats))
-    outputs.append(_figure_distance_cosine_hexbin(figures_dir, sig, term_signatures, formats))
-    outputs.append(_figure_pca_term_space(figures_dir, sig, term_signatures, formats))
-    outputs.append(_figure_signature_heatmap(figures_dir, sig, formats))
+    outputs.append(_figure_similarity_distributions(figures_dir, sig, term_signatures, formats, library_name))
+    outputs.append(_figure_distance_cosine_hexbin(figures_dir, sig, term_signatures, formats, library_name))
+    outputs.append(_figure_pca_term_space(figures_dir, sig, term_signatures, formats, library_name))
+    outputs.append(_figure_signature_heatmap(figures_dir, sig, formats, library_name))
 
     index_path = os.path.join(figures_dir, "index.json")
     _ensure_dir(index_path)
