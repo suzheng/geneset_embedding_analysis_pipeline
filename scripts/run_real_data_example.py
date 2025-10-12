@@ -1,52 +1,68 @@
 from __future__ import annotations
 
-import json
 import os
-from typing import List
+import sys
+from pathlib import Path
 
-from src.pipeline import compute_input_signatures, load_precomputed_terms_jsonl, match_input_to_terms
-from src.precompute_terms import precompute_from_file
+# Add project root to Python path to import src modules
+project_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.main import main as run_main
 
 
 def main() -> None:
-    # Paths
-    project_root = os.path.dirname(os.path.dirname(__file__))
-    embeddings_path = os.path.join(project_root, "data", "GeneRAIN-vec.32d.txt")
-    clinvar_path = \
-        "/Users/suzheng/noBackupData/BioBot/backend/data/tools/tool_data/database/gene_enrichment_analysis/ClinVar_2019.tsv"
-    out_jsonl = os.path.join(project_root, "precomputed", "ClinVar_2019.signatures.jsonl")
-    os.makedirs(os.path.dirname(out_jsonl), exist_ok=True)
-
-    # Precompute ClinVar
-    print("Precomputing ClinVar_2019 signatures...")
-    precompute_from_file(embeddings_path, clinvar_path, out_jsonl, min_genes_per_term=3)
-    print(f"Wrote: {out_jsonl}")
-
+    """
+    Example script demonstrating how to run the geneset embedding analysis
+    for a library group using the updated main.py
+    """
+    
+    # Set up paths
+    embeddings_path = str(project_root / "data" / "GeneRAIN-vec.200d.txt")
+    
     # Example input gene list (pick a few common ones likely present)
-    example_genes: List[str] = [
-        "TP53", "EGFR", "BRCA1", "BRCA2", "PTEN", "KRAS", "APOE", "MYC", "ALK", "MTHFR", "CFTR", "TNF"
+    example_genes = "TP53,EGFR,BRCA1,BRCA2,PTEN,KRAS,APOE,MYC,ALK,MTHFR,CFTR,TNF"
+    
+    # Prepare command-line arguments for main.py
+    # Run analysis for the "Pathways" group as an example
+    sys.argv = [
+        "run_real_data_example.py",
+        "--embeddings-path", embeddings_path,
+        "--entity-id", "example_run",
+        "--input-genes", example_genes,
+        "--library-group", "Pathways",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
+        "--dims-filter", "quantile",
+        "--q-low", "0.3",
+        "--top-k", "25",
+        "--no-clustering",
     ]
-
-    # Compute input signature(s)
-    sigs, found, missing, d = compute_input_signatures(
-        embeddings_path,
-        example_genes,
-        enable_clustering=False,
-    )
-    print(f"Found {len(found)} genes in embeddings; missing: {len(missing)}")
-    if missing:
-        print("Missing symbols:", ", ".join(sorted(missing)))
-
-    # Load precomputed ClinVar term signatures
-    term_signatures = load_precomputed_terms_jsonl(out_jsonl)
-    print(f"Loaded {len(term_signatures)} term signatures from ClinVar_2019")
-
-    # Match and show top results for the first signature
-    sig = sigs[0]
-    ranked = match_input_to_terms(sig, term_signatures, dims_filter="quantile", q_low=0.3)
-    print("Top 10 matches:")
-    for i, (t, dist, cos) in enumerate(ranked[:10], start=1):
-        print(f"{i:2d}. {t.library} | {t.term[:80]} | dist={dist:.4f} | cos={cos:.4f} | n={t.n_found} cov={t.coverage:.2f}")
+    
+    print("=" * 80)
+    print("Running geneset embedding analysis with library group: Pathways")
+    print("=" * 80)
+    print()
+    
+    # Call the main function from main.py
+    run_main()
+    
+    print()
+    print("=" * 80)
+    print("Example completed!")
+    print("=" * 80)
+    print()
+    print("To run other groups, modify the --library-group argument:")
+    print("  - Gene_Ontology (3 libraries)")
+    print("  - Pathways (2 libraries)")
+    print("  - Drug_and_Chemical_Perturbations (7 libraries)")
+    print("  - Gene_Perturbations (3 libraries)")
+    print("  - Disease_and_Phenotype_Associations (6 libraries)")
+    print("  - Rare_Disease_Associations (2 libraries)")
+    print("  - Tissue_and_Cell_Type_Markers (3 libraries)")
+    print("  - Cellular_Compartments (2 libraries)")
+    print("  - Protein_Domains_and_Complexes (3 libraries)")
+    print("  - Gene_Regulation (4 libraries)")
+    print("  - Miscellaneous (7 libraries)")
+    print("  - all (run all groups)")
 
 
 if __name__ == "__main__":
