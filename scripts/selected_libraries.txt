@@ -6,8 +6,6 @@ Reactome_Pathways_2024.tsv	Pathways	Pathways
 BioPlanet_2019.tsv	Pathways	Pathways
 LINCS_L1000_Chem_Pert_Consensus_Sigs.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
 RummaGEO_DrugPerturbations_2025.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
-L1000_Kinase_and_GPCR_Perturbations_up.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
-L1000_Kinase_and_GPCR_Perturbations_down.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
 DrugMatrix.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
 DSigDB.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
 RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO.tsv	Drug & Chemical Perturbations	Drug_and_Chemical_Perturbations
