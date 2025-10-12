@@ -122,6 +122,10 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--cluster-min-genes", type=int, default=20, help="Min genes to attempt clustering")
     p.add_argument("--random-state", type=int, default=17, help="Random seed for deterministic behavior")
 
+    # Figure generation options
+    p.add_argument("--generate-figures", action="store_true", default=True, help="Generate publication-quality figures")
+    p.add_argument("--figure-formats", nargs='+', default=["svg"], help="Figure formats (default: svg png)")
+
     return p.parse_args()
 
 
@@ -158,6 +162,73 @@ def main() -> None:
         print(f"Running analysis for library group: {args.library_group}")
         print(f"Found {len(libraries)} libraries to process")
         print("=" * 80)
+        print()
+        print("Output files for each library (naming pattern: {entity_id}_{library_name}_geneset_embed_*):")
+        print()
+        print("  Main Result Files:")
+        print("    - *_qc.csv                    : Quality control metrics (gene coverage, clustering)")
+        print("    - *_cohort_signatures.csv     : Sample signature matrix (rows=samples, cols=dimensions)")
+        print("    - *_signature.json            : Sample-specific signature (mean, std vectors)")
+        print("    - *_term_matches.csv          : Top matching terms from the library")
+        print("    - *_run_info.json             : Run metadata and parameters")
+        print()
+        print("  Documentation Files:")
+        print("    - *_preprocess.PARAMS.md      : Preprocessing parameters")
+        print("    - *_preprocess.RESULTS.md     : Preprocessing numerical results")
+        print("    - *_qc.PARAMS.md              : QC parameters")
+        print("    - *_qc.RESULTS.md             : QC numerical results")
+        print("    - *_signature.PARAMS.md       : Signature computation parameters")
+        print("    - *_signature.RESULTS.md      : Signature numerical results")
+        print("    - *_term_matching.PARAMS.md   : Term matching parameters")
+        print("    - *_term_matching.RESULTS.md  : Term matching numerical results")
+        print("    - *_cohort_integration.PARAMS.md   : Cohort integration parameters")
+        print("    - *_cohort_integration.RESULTS.md  : Cohort integration numerical results")
+        print()
+        print("  Shared Documentation (in shared_doc/ subfolder):")
+        print("    - SHARED_*.METHOD.md          : Methodology descriptions (same across runs)")
+        print("    - SHARED_*.RESULT_INTERPRETATION.md : Result interpretation guides")
+        print()
+        
+        if args.generate_figures:
+            print("  Publication-Quality Figures (in figures/ subfolder):")
+            print("    Generated when --generate-figures is enabled")
+            print()
+            print("    1. term_signatures_distributions (.svg, .data.csv)")
+            print("       Distribution of gene coverage across precomputed library terms")
+            print("       Shows quality metrics: genes found per term and coverage fraction")
+            print()
+            print("    2. dimension_filtering (.svg, .data.csv)")
+            print("       Standard deviation distribution across embedding dimensions")
+            print("       Visualizes dimension selection threshold for filtering")
+            print()
+            print("    3. dimension_filtering_bar (.svg, .data.csv)")
+            print("       Bar chart showing selected (orange) vs filtered (blue) dimensions")
+            print("       Highlights which dimensions contribute to similarity matching")
+            print()
+            print("    4. top_matches_example (.svg, .data.csv)")
+            print("       Horizontal bar chart of top matching terms from reference library")
+            print("       Shows closest functional annotations with variance-weighted distances")
+            print()
+            print("    5. similarity_distributions (.svg, .data.csv)")
+            print("       Dual histogram: distance and cosine similarity distributions")
+            print("       Statistical overview of all term similarity scores")
+            print()
+            print("    6. distance_cosine_hexbin (.svg, .data.csv)")
+            print("       2D hexagonal density plot of distance vs cosine similarity")
+            print("       Shows correlation between the two similarity metrics")
+            print()
+            print("    7. pca_term_space (.svg, .data.csv)")
+            print("       PCA projection of all term signatures in 2D space")
+            print("       Top matches highlighted to show relative positioning")
+            print()
+            print("    8. signature_heatmap (.svg, .data.json)")
+            print("       Side-by-side heatmaps of signature mean and std vectors")
+            print("       Visual representation of embedding signature across dimensions")
+            print()
+            print("    Each figure includes a companion data file (.csv or .json) for reproduction")
+            print()
+        
+        print("=" * 80)
         
         # Run analysis for each library separately
         results = []
@@ -167,7 +238,6 @@ def main() -> None:
             jsonl_path = precomputed_dir / jsonl_filename
             
             print(f"\n[{idx}/{len(libraries)}] Processing library: {library_filename}")
-            print(f"  Precomputed signatures: {jsonl_path}")
             
             if not jsonl_path.exists():
                 print(f"  WARNING: Precomputed signatures not found, skipping.")
@@ -195,6 +265,9 @@ def main() -> None:
                     enable_clustering=args.enable_clustering,
                     cluster_min_genes=args.cluster_min_genes,
                     random_state=args.random_state,
+                    verbose_output=False,  # Suppress detailed OUTPUT: lines for batch processing
+                    generate_figures=args.generate_figures,
+                    figure_formats=args.figure_formats,
                 )
                 results.append({
                     "library": library_filename,
@@ -245,6 +318,8 @@ def main() -> None:
             enable_clustering=args.enable_clustering,
             cluster_min_genes=args.cluster_min_genes,
             random_state=args.random_state,
+            generate_figures=args.generate_figures,
+            figure_formats=args.figure_formats,
         )
 
 

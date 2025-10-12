@@ -24,13 +24,13 @@ def main() -> None:
     example_genes = "TP53,EGFR,BRCA1,BRCA2,PTEN,KRAS,APOE,MYC,ALK,MTHFR,CFTR,TNF"
     
     # Prepare command-line arguments for main.py
-    # Run analysis for the "Pathways" group as an example
+    # Run analysis for the "Drug_and_Chemical_Perturbations" group as an example
     sys.argv = [
         "run_real_data_example.py",
         "--embeddings-path", embeddings_path,
         "--entity-id", "example_run",
         "--input-genes", example_genes,
-        "--library-group", "Pathways",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
+        "--library-group", "Drug_and_Chemical_Perturbations",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
         "--dims-filter", "quantile",
         "--q-low", "0.3",
         "--top-k", "25",
