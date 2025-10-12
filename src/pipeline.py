@@ -326,6 +326,196 @@ def _write_shared_result_doc(entity_id: str, output_dir: str, step: str, text: s
     return path
 
 
+def _copy_background_doc(output_dir: str, verbose: bool = True) -> str:
+    """Copy BACKGROUND.md from src directory to shared_doc folder."""
+    shared_dir = os.path.join(output_dir, "shared_doc")
+    os.makedirs(shared_dir, exist_ok=True)
+    
+    # Determine the source path for BACKGROUND.md in the src directory
+    # Get the directory where this pipeline.py file is located
+    pipeline_dir = os.path.dirname(os.path.abspath(__file__))
+    source_path = os.path.join(pipeline_dir, "BACKGROUND.md")
+    dest_path = os.path.join(shared_dir, "BACKGROUND.md")
+    
+    # Copy the file if it exists
+    if os.path.exists(source_path):
+        import shutil
+        shutil.copy2(source_path, dest_path)
+        _print_output(dest_path, "md", "Pipeline background documentation", verbose=verbose)
+        return dest_path
+    else:
+        if verbose:
+            print(f"WARNING: BACKGROUND.md not found at {source_path}", file=sys.stderr)
+        return ""
+
+
+def _write_figure_legend_doc(entity_id: str, output_dir: str, library_name: str, find_opposite_terms: str, verbose: bool = True) -> str:
+    """Write comprehensive figure legends for all generated figures."""
+    shared_dir = os.path.join(output_dir, "shared_doc")
+    os.makedirs(shared_dir, exist_ok=True)
+    path = os.path.join(shared_dir, "FIGURE_LEGEND.md")
+    
+    # Determine if opposite figures are included
+    has_opposite = should_find_opposite_terms(entity_id, find_opposite_terms)
+    
+    # Generate comprehensive figure legends following academic publication standards
+    legend_text = f"""# Figure Legends
+
+This document provides comprehensive figure titles and legends for all generated figures, following academic publication standards.
+
+## Figure 1: Gene Set Coverage Distribution in Reference Library
+
+**Title:** Distribution of Gene Coverage Across Precomputed Term Signatures in {library_name or 'Reference Library'}
+
+**Legend:** 
+(A) Histogram showing the distribution of the number of genes found per term signature in the reference library. Each bar represents the frequency of terms with a given number of genes successfully mapped to the embedding space. This distribution reflects the size variability of gene sets in the reference library and their representation in the pre-trained embedding model.
+(B) Histogram depicting the coverage distribution (fraction of genes with available embeddings) across all term signatures. Coverage values range from 0 to 1, where higher values indicate better representation of gene sets in the embedding space. High coverage (>0.8) suggests comprehensive gene annotation, while lower coverage may indicate specialized or poorly characterized gene sets.
+
+**File:** `term_signatures_distributions.svg`
+
+---
+
+## Figure 2: Embedding Dimension Standard Deviation Profile
+
+**Title:** Standard Deviation Profile Across Embedding Dimensions for Query Gene Set
+
+**Legend:** 
+Line plot showing the standard deviation (σ) of the query gene set signature across all embedding dimensions, sorted in ascending order. The horizontal dashed line indicates the quantile threshold (q = 0.3) used for dimension selection. Dimensions below this threshold exhibit low within-set variability and are retained for downstream matching, as they represent stable, coherent semantic features. Dimensions above the threshold show high variability and are filtered out to focus the analysis on the most informative features. This dimension selection strategy enhances the signal-to-noise ratio in similarity calculations.
+
+**File:** `dimension_filtering.svg`
+
+---
+
+## Figure 3: Dimension Selection Summary
+
+**Title:** Selected and Filtered Embedding Dimensions Based on Variability Threshold
+
+**Legend:** 
+Bar chart visualizing the standard deviation of each embedding dimension for the query gene set. Dimensions are colored by their selection status: orange bars represent selected dimensions (low variability, below the 0.3 quantile threshold) that are retained for matching, while blue bars indicate filtered dimensions (high variability) that are excluded from similarity calculations. This visualization provides a comprehensive view of which semantic features contribute to the functional interpretation of the gene set.
+
+**File:** `dimension_filtering_bar.svg`
+
+---
+
+## Figure 4: Top Functionally Similar Terms
+
+**Title:** Top Matching Gene Set Terms Ranked by Variance-Weighted Distance
+
+**Legend:** 
+Horizontal bar chart displaying the top 10 most similar terms from the reference library ({library_name or 'reference library'}), ranked by variance-weighted distance (lower values indicate stronger similarity). Each bar represents the distance metric, which combines the Euclidean distance between signature mean vectors with inverse-variance weighting to prioritize stable dimensions. Term names are displayed on the y-axis, ordered from most similar (top) to least similar (bottom). This ranking identifies the closest functional relatives of the query gene set in the reference library, providing biological context and potential functional annotations.
+
+**File:** `top_matches_example.svg`
+
+---
+
+## Figure 5: Similarity Metric Distributions
+
+**Title:** Distribution of Distance and Cosine Similarity Scores Across All Reference Terms
+
+**Legend:** 
+(A) Distribution of variance-weighted distance scores computed between the query gene set signature and all reference term signatures. Lower distance values indicate greater similarity. The distribution typically shows a right-skewed pattern, with most terms at moderate distances and a tail of highly similar matches. Kernel density estimation (KDE) overlay highlights the probability density.
+(B) Distribution of cosine similarity scores between the query signature and all reference terms. Cosine similarity ranges from -1 (opposite direction) to +1 (same direction), measuring directional alignment in embedding space. Values near +1 indicate strong functional similarity, while values near 0 suggest orthogonal (unrelated) gene sets. These distributions provide a global view of how the query gene set relates to the entire reference library.
+
+**File:** `similarity_distributions.svg`
+
+---
+
+## Figure 6: Joint Distance-Similarity Landscape
+
+**Title:** Two-Dimensional Density Plot of Distance vs. Cosine Similarity for Reference Terms
+
+**Legend:** 
+Hexagonal binning plot showing the joint distribution of variance-weighted distance (x-axis) and cosine similarity (y-axis) across all reference term signatures. The color intensity (blue gradient) represents the density of terms in each hexagonal bin, revealing the relationship between these two complementary similarity metrics. Overlaid magenta points highlight the top matching terms, which typically cluster in the low-distance, high-cosine-similarity region (bottom-right quadrant). This visualization helps identify whether top matches are driven primarily by distance minimization, directional alignment, or both.
+
+**File:** `distance_cosine_hexbin.svg`
+
+---
+
+## Figure 7: PCA Projection of Reference Term Space
+
+**Title:** Principal Component Analysis of Reference Term Signatures with Top Matches Highlighted
+
+**Legend:** 
+Two-dimensional PCA projection of all reference term signatures (mean embedding vectors), with PC1 and PC2 axes labeled by their explained variance ratios. Background points (light blue) represent all terms in the reference library, illustrating the global structure of functional gene set space. Green points indicate the top matching terms, showing their spatial proximity to the query gene set. The query gene set signature is shown as an orange star, positioned within the reference term landscape. Terms that cluster near the query are functionally related, while distant terms represent distinct biological processes. This projection provides an intuitive geometric view of functional similarity relationships.
+
+**File:** `pca_term_space.svg`
+
+---
+
+## Figure 8: Gene Set Signature Heatmap
+
+**Title:** Heatmap Visualization of Query Gene Set Signature Mean and Standard Deviation Vectors
+
+**Legend:** 
+(A) Heatmap displaying the mean embedding vector (μ) of the query gene set across all dimensions. Color intensity (coolwarm colormap) represents the magnitude and sign of each dimension's mean value, with blue indicating negative values and red indicating positive values. This vector captures the centroid or "average position" of the gene set in embedding space, encoding its dominant functional characteristics.
+(B) Heatmap showing the standard deviation vector (σ) across all dimensions, visualized using a magma colormap (dark purple to bright yellow). Higher values (yellow) indicate dimensions with high within-set gene variability, suggesting functional heterogeneity, while lower values (purple) represent coherent dimensions where genes are tightly clustered. Together, these two vectors define the complete signature used for functional term matching.
+
+**File:** `signature_heatmap.svg`
+
+---
+"""
+
+    # Add opposite term figures if enabled
+    if has_opposite:
+        legend_text += f"""## Figure 9: Top Functionally Opposite Terms
+
+**Title:** Top Opposite Gene Set Terms Ranked by Negative Cosine Similarity
+
+**Legend:** 
+Horizontal bar chart displaying the top 10 most functionally opposite terms from the reference library ({library_name or 'reference library'}), ranked by cosine similarity (most negative values indicate strongest opposition). Each bar represents the cosine similarity score, where values approaching -1 indicate gene sets with opposite directionality in embedding space. This analysis identifies biological processes or gene sets that are functionally antagonistic or contrasting to the query gene set, which is particularly valuable for perturbation studies (e.g., drug vs. disease, knockdown vs. overexpression) where identifying opposing biological states is informative.
+
+**File:** `top_opposite_matches_example.svg`
+
+---
+
+## Figure 10: Joint Distance-Similarity Landscape with Opposite Matches
+
+**Title:** Two-Dimensional Density Plot Highlighting Top Opposite Gene Set Terms
+
+**Legend:** 
+Hexagonal binning plot showing the joint distribution of variance-weighted distance (x-axis) and cosine similarity (y-axis) across all reference term signatures. The color intensity (blue gradient) represents term density. Overlaid orange points highlight the top opposite terms, which typically cluster in regions with negative cosine similarity values (upper portion of plot), indicating directional opposition to the query gene set. This visualization reveals whether opposite matches are characterized by large distances, negative directional alignment, or both, providing insight into the nature of functional opposition.
+
+**File:** `distance_cosine_hexbin_opposite.svg`
+
+---
+
+## Figure 11: PCA Projection with Opposite Matches Highlighted
+
+**Title:** Principal Component Analysis of Reference Terms with Functionally Opposite Matches
+
+**Legend:** 
+Two-dimensional PCA projection of all reference term signatures, with PC1 and PC2 axes labeled by their explained variance ratios. Background points (light blue) represent all terms in the reference library. Orange points indicate the top opposite matching terms, showing their spatial positioning relative to the query gene set (orange star). Terms positioned on the opposite side of the PCA space from the query typically represent contrasting biological processes or phenotypes. This geometric visualization helps interpret the nature of functional opposition in terms of the major axes of variation in the reference library.
+
+**File:** `pca_term_space_opposite.svg`
+
+---
+"""
+
+    # Add footer with general notes
+    legend_text += """## General Notes
+
+**Figure Format:** All figures are provided in multiple formats (SVG for publications, PNG for presentations) to ensure broad compatibility.
+
+**Data Files:** Each figure is accompanied by a corresponding data file (`.data.csv` or `.data.json`) containing the underlying numerical data used to generate the visualization, ensuring full reproducibility and enabling custom reanalysis.
+
+**Color Schemes:** Figures use a consistent, colorblind-friendly palette optimized for scientific publication. Background grid lines are removed per publication standards, and font sizes are optimized for readability in both print and digital formats.
+
+**Statistical Methods:** All distance calculations use variance-weighted metrics that prioritize stable dimensions (low within-set variability) and down-weight noisy dimensions (high variability). Cosine similarity provides a complementary directional measure. Dimension selection (quantile filtering at q=0.3) focuses the analysis on the most informative semantic features.
+
+**Reproducibility:** All figures are generated using standardized matplotlib configuration with embedded fonts (Type 42 PDF fonts, SVG none), ensuring consistent appearance across platforms and publications. Random seeds are fixed for all analyses involving stochastic components (e.g., PCA initialization).
+
+---
+
+**Generated by:** Gene Set Embedding Analysis Pipeline  
+**Document Version:** 1.0  
+**Last Updated:** {datetime.utcnow().strftime('%Y-%m-%d')}
+"""
+
+    _write_text(path, legend_text)
+    _print_output(path, "md", "Figure legends and descriptions", verbose=verbose)
+    return path
+
+
 def _write_run_results_doc(output_dir: str, entity_id: str, pipeline_short: str, step: str, text: str, verbose: bool = True) -> str:
     """Write run-specific numerical results."""
     path = os.path.join(output_dir, f"{entity_id}_{pipeline_short}_{step}.RESULTS.md")
@@ -573,6 +763,11 @@ def geneset_embedding(
         ref_genes_list = _read_gene_list_from_file(str(reference_genes_file))
     
     samples.append({"sample_id": clean_id, "genes": list(input_genes), "reference_genes": ref_genes_list})
+
+    # Copy background documentation to shared_doc folder
+    background_path = _copy_background_doc(output_dir, verbose=verbose_output)
+    if background_path:
+        artifacts.append(os.path.abspath(background_path))
 
     # Documentation: preprocess step
     if "preprocess" in steps_set:
@@ -1219,6 +1414,16 @@ def geneset_embedding(
             find_opposite_terms
         )
         artifacts.extend(figure_paths)
+        
+        # Generate figure legend documentation
+        legend_path = _write_figure_legend_doc(
+            clean_id, 
+            output_dir, 
+            lib_name, 
+            find_opposite_terms,
+            verbose_output
+        )
+        artifacts.append(legend_path)
 
     # If verbose is off, print a summary line
     if not verbose_output:
