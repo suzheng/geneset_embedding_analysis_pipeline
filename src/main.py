@@ -116,6 +116,11 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--cv-threshold", type=float, default=1.0, help="CV threshold for cv filter")
     p.add_argument("--z-threshold", type=float, default=0.5, help="Z-score threshold for zscore filter (negative tail)")
     p.add_argument("--top-k", type=int, default=25, help="Top K results to keep for matches")
+    p.add_argument(
+        "--find-opposite-terms",
+        default="auto",
+        help="Find most opposite/different terms: true|false|auto (auto enables for Drug_and_Chemical_Perturbations, Gene_Perturbations, Protein_Domains_and_Complexes, Gene_Regulation, Miscellaneous groups)"
+    )
 
     p.add_argument("--enable-clustering", action="store_true", default=True, help="Enable optional clustering")
     p.add_argument("--no-clustering", dest="enable_clustering", action="store_false", help="Disable clustering")
@@ -225,6 +230,21 @@ def main() -> None:
             print("       Side-by-side heatmaps of signature mean and std vectors")
             print("       Visual representation of embedding signature across dimensions")
             print()
+            print("    Additional figures for opposite/different term matching:")
+            print("    (Generated when --find-opposite-terms is enabled or set to 'auto' for applicable library groups)")
+            print()
+            print("    9. top_opposite_matches_example (.svg, .data.csv)")
+            print("       Horizontal bar chart of top opposite/different terms from reference library")
+            print("       Shows most dissimilar functional annotations based on negative cosine similarity")
+            print()
+            print("    10. distance_cosine_hexbin_opposite (.svg, .data.csv)")
+            print("        2D hexagonal density plot with opposite matches highlighted")
+            print("        Same base plot as #6 but highlights the most opposite terms")
+            print()
+            print("    11. pca_term_space_opposite (.svg, .data.csv)")
+            print("        PCA projection with opposite matches highlighted")
+            print("        Shows spatial relationship of opposite terms to input genes")
+            print()
             print("    Each figure includes a companion data file (.csv or .json) for reproduction")
             print()
         
@@ -262,6 +282,7 @@ def main() -> None:
                     cv_threshold=args.cv_threshold,
                     z_threshold=args.z_threshold,
                     top_k=args.top_k,
+                    find_opposite_terms=args.find_opposite_terms,
                     enable_clustering=args.enable_clustering,
                     cluster_min_genes=args.cluster_min_genes,
                     random_state=args.random_state,
@@ -315,6 +336,7 @@ def main() -> None:
             cv_threshold=args.cv_threshold,
             z_threshold=args.z_threshold,
             top_k=args.top_k,
+            find_opposite_terms=args.find_opposite_terms,
             enable_clustering=args.enable_clustering,
             cluster_min_genes=args.cluster_min_genes,
             random_state=args.random_state,

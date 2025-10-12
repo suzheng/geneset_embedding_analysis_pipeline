@@ -554,18 +554,24 @@ def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List
     means = np.stack([np.asarray(t.mean, dtype=float) for t in term_signatures], axis=0)
     pca = PCA(n_components=2, random_state=0)
     coords = pca.fit_transform(means)
+    
+    # Project input signature into PCA space
+    input_mean = np.asarray(sig.mean, dtype=float).reshape(1, -1)
+    input_coord = pca.transform(input_mean)
 
     # Save input data
     data_csv_path = os.path.join(figures_dir, "pca_term_space.data.csv")
     _ensure_dir(data_csv_path)
     with open(data_csv_path, "w", encoding="utf-8") as f:
-        f.write("term_id,library,term,x,y,is_top\n")
+        f.write("term_id,library,term,x,y,is_top,is_input\n")
         ranked = match_input_to_terms(sig, term_signatures, dims_filter="quantile", q_low=0.3)
         top_ids = set(id(r[0]) for r in ranked[:top_k])
         for (t, xy) in zip(term_signatures, coords):
             is_top = int(id(t) in top_ids)
             term_clean = t.term.replace("\"", "'")
-            f.write(f"{t.term_id},{t.library},\"{term_clean}\",{xy[0]},{xy[1]},{is_top}\n")
+            f.write(f"{t.term_id},{t.library},\"{term_clean}\",{xy[0]},{xy[1]},{is_top},0\n")
+        # Add input signature
+        f.write(f"INPUT,INPUT,\"Input genes\",{input_coord[0, 0]},{input_coord[0, 1]},0,1\n")
 
     width_in, height_in = 3.4, 3.4
     fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
@@ -593,16 +599,236 @@ def _figure_pca_term_space(figures_dir: str, sig, term_signatures, formats: List
             linewidths=0.5,
             label=_replace_underscores("Top matches"),
         )
+    
+    # Plot input genes embedding
+    ax.scatter(
+        input_coord[0, 0],
+        input_coord[0, 1],
+        s=80,
+        c="#d55e00",
+        marker="*",
+        edgecolors="#333333",
+        linewidths=0.8,
+        zorder=5,
+        label=_replace_underscores("Input genes"),
+    )
 
     # Only show library name in title
     if library_name:
         ax.set_title(wrap_title(_replace_underscores(library_name), max_chars_per_line=40))
-    ax.set_xlabel("PC1")
-    ax.set_ylabel("PC2")
+    
+    # Add explained variance to axis labels
+    var_pc1 = pca.explained_variance_ratio_[0] * 100
+    var_pc2 = pca.explained_variance_ratio_[1] * 100
+    ax.set_xlabel(f"PC1 ({var_pc1:.1f}%)")
+    ax.set_ylabel(f"PC2 ({var_pc2:.1f}%)")
     ax.legend(loc="best", frameon=False)
 
     _disable_grid(fig)
     saved = _save_figure(fig, figures_dir, "pca_term_space", formats)
+    plt.close(fig)
+    primary = saved[formats[0]]
+    return primary, data_csv_path
+
+
+def _figure_top_matches_opposite(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "") -> Tuple[str, str]:
+    import matplotlib.pyplot as plt
+    from src.pipeline import match_input_to_terms_most_opposite
+
+    ranked = match_input_to_terms_most_opposite(sig, term_signatures, dims_filter="quantile", q_low=0.3)
+    top = ranked[:10]
+
+    rows: List[Dict[str, Any]] = []
+    for i, (t, dist, cos) in enumerate(top, start=1):
+        rows.append(
+            {
+                "rank": i,
+                "term_id": t.term_id,
+                "library": t.library,
+                "term": t.term,
+                "distance": float(dist),
+                "cosine": float(cos),
+                "n_found": int(t.n_found),
+                "coverage": float(t.coverage),
+            }
+        )
+
+    data_csv_path = os.path.join(figures_dir, "top_opposite_matches_example.data.csv")
+    _ensure_dir(data_csv_path)
+    with open(data_csv_path, "w", encoding="utf-8") as f:
+        f.write("rank,term_id,library,term,distance,cosine,n_found,coverage\n")
+        for r in rows:
+            term_clean = r["term"].replace("\"", "'")
+            f.write(
+                f"{r['rank']},{r['term_id']},{r['library']},\"{term_clean}\",{r['distance']},{r['cosine']},{r['n_found']},{r['coverage']}\n"
+            )
+
+    width_in, height_in = 5.0, 4.5  # Increased width from 3.4 to 5.0
+    fig, ax = plt.subplots(figsize=(width_in, height_in))
+
+    labels_raw = [r[0].term for r in top]
+    labels = _wrap_or_truncate_labels(labels_raw, max_chars_per_line=35, max_lines=2)  # Increased from 26 to 35
+    # For opposite matches, we show cosine similarity (more negative = more opposite)
+    cosines = [float(r[2]) for r in top]
+    y = np.arange(len(top))
+
+    ax.barh(y, cosines, color="#e69f00")  # Orange color for opposite
+    ax.invert_yaxis()
+    ax.set_xlabel(_replace_underscores("Cosine similarity (most negative)"))
+    ax.set_ylabel(_replace_underscores("Top opposite matches"))
+    ax.set_yticks(y)
+    ax.set_yticklabels([_replace_underscores(l) for l in labels], fontsize=7.5)
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(f"{library_name} (opposite)"), max_chars_per_line=45))
+
+    max_label_chars = max(len(l) for l in labels)
+    extra_left = min(0.35, 0.012 * max_label_chars)
+    plt.subplots_adjust(left=0.2 + extra_left)
+
+    _disable_grid(fig)
+    saved = _save_figure(fig, figures_dir, "top_opposite_matches_example", formats)
+    plt.close(fig)
+    primary = saved[formats[0]]
+    return primary, data_csv_path
+
+
+def _figure_distance_cosine_hexbin_opposite(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "", top_k: int = 15) -> Tuple[str, str]:
+    import matplotlib.pyplot as plt
+    from src.pipeline import match_input_to_terms_most_opposite
+    from src.match import variance_weighted_distance, cosine_similarity
+
+    # Compute scatter data
+    distances: List[float] = []
+    cosines: List[float] = []
+    for t in term_signatures:
+        distances.append(variance_weighted_distance(sig.mean, sig.std, t.mean, t.std))
+        cosines.append(cosine_similarity(sig.mean, t.mean))
+
+    # Save input data
+    data_csv_path = os.path.join(figures_dir, "distance_cosine_hexbin_opposite.data.csv")
+    _ensure_dir(data_csv_path)
+    with open(data_csv_path, "w", encoding="utf-8") as f:
+        f.write("distance,cosine\n")
+        for dval, cval in zip(distances, cosines):
+            f.write(f"{dval},{cval}\n")
+
+    # Top opposite matches to highlight
+    ranked = match_input_to_terms_most_opposite(sig, term_signatures, dims_filter="quantile", q_low=0.3)
+    top = ranked[:top_k]
+
+    width_in, height_in = 3.4, 3.4
+    fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
+    hb = ax.hexbin(distances, cosines, gridsize=40, cmap="Blues", mincnt=1)
+    cb = fig.colorbar(hb, ax=ax)
+    cb.ax.set_ylabel(_replace_underscores("Density"))
+
+    # Overlay top opposite matches
+    x_top = [float(r[1]) for r in top]
+    y_top = [float(r[2]) for r in top]
+    ax.scatter(
+        x_top,
+        y_top,
+        c="#e69f00",  # Orange for opposite
+        s=18,
+        edgecolors="#333333",
+        linewidths=0.5,
+        zorder=3,
+        label=_replace_underscores("Top opposite matches"),
+    )
+
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(f"{library_name} (opposite)"), max_chars_per_line=40))
+    ax.set_xlabel(_replace_underscores("Variance weighted distance"))
+    ax.set_ylabel(_replace_underscores("Cosine similarity"))
+    ax.set_ylim(-1.0, 1.0)
+    ax.legend(loc="upper right", frameon=False)
+
+    _disable_grid(fig)
+    saved = _save_figure(fig, figures_dir, "distance_cosine_hexbin_opposite", formats)
+    plt.close(fig)
+    primary = saved[formats[0]]
+    return primary, data_csv_path
+
+
+def _figure_pca_term_space_opposite(figures_dir: str, sig, term_signatures, formats: List[str], library_name: str = "", top_k: int = 20) -> Tuple[str, str]:
+    import matplotlib.pyplot as plt
+    from sklearn.decomposition import PCA
+    from src.pipeline import match_input_to_terms_most_opposite
+
+    # Stack term means
+    means = np.stack([np.asarray(t.mean, dtype=float) for t in term_signatures], axis=0)
+    pca = PCA(n_components=2, random_state=0)
+    coords = pca.fit_transform(means)
+    
+    # Project input signature into PCA space
+    input_mean = np.asarray(sig.mean, dtype=float).reshape(1, -1)
+    input_coord = pca.transform(input_mean)
+
+    # Save input data
+    data_csv_path = os.path.join(figures_dir, "pca_term_space_opposite.data.csv")
+    _ensure_dir(data_csv_path)
+    with open(data_csv_path, "w", encoding="utf-8") as f:
+        f.write("term_id,library,term,x,y,is_top_opposite,is_input\n")
+        ranked = match_input_to_terms_most_opposite(sig, term_signatures, dims_filter="quantile", q_low=0.3)
+        top_ids = set(id(r[0]) for r in ranked[:top_k])
+        for (t, xy) in zip(term_signatures, coords):
+            is_top = int(id(t) in top_ids)
+            term_clean = t.term.replace("\"", "'")
+            f.write(f"{t.term_id},{t.library},\"{term_clean}\",{xy[0]},{xy[1]},{is_top},0\n")
+        # Add input signature
+        f.write(f"INPUT,INPUT,\"Input genes\",{input_coord[0, 0]},{input_coord[0, 1]},0,1\n")
+
+    width_in, height_in = 3.4, 3.4
+    fig, ax = plt.subplots(figsize=(width_in, height_in), constrained_layout=True)
+
+    # Plot background terms
+    ax.scatter(coords[:, 0], coords[:, 1], s=6, c="#56b4e9", alpha=0.35, edgecolors="none")
+
+    # Highlight top opposite matches
+    ranked = match_input_to_terms_most_opposite(sig, term_signatures, dims_filter="quantile", q_low=0.3)
+    top = ranked[:top_k]
+    top_indices = []
+    term_to_index = {id(t): i for i, t in enumerate(term_signatures)}
+    for t, _d, _c in top:
+        idx = term_to_index.get(id(t))
+        if idx is not None:
+            top_indices.append(idx)
+    if top_indices:
+        ax.scatter(
+            coords[top_indices, 0],
+            coords[top_indices, 1],
+            s=16,
+            c="#e69f00",  # Orange for opposite
+            edgecolors="#333333",
+            linewidths=0.5,
+            label=_replace_underscores("Top opposite matches"),
+        )
+    
+    # Plot input genes embedding (same color as in normal PCA)
+    ax.scatter(
+        input_coord[0, 0],
+        input_coord[0, 1],
+        s=80,
+        c="#d55e00",
+        marker="*",
+        edgecolors="#333333",
+        linewidths=0.8,
+        zorder=5,
+        label=_replace_underscores("Input genes"),
+    )
+
+    if library_name:
+        ax.set_title(wrap_title(_replace_underscores(f"{library_name} (opposite)"), max_chars_per_line=40))
+    
+    # Add explained variance to axis labels
+    var_pc1 = pca.explained_variance_ratio_[0] * 100
+    var_pc2 = pca.explained_variance_ratio_[1] * 100
+    ax.set_xlabel(f"PC1 ({var_pc1:.1f}%)")
+    ax.set_ylabel(f"PC2 ({var_pc2:.1f}%)")
+    ax.legend(loc="best", frameon=False)
+
+    _disable_grid(fig)
+    saved = _save_figure(fig, figures_dir, "pca_term_space_opposite", formats)
     plt.close(fig)
     primary = saved[formats[0]]
     return primary, data_csv_path

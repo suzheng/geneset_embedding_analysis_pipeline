@@ -157,6 +157,82 @@ def sanitize_simple_id(entity_id: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_-]", "", str(entity_id))
 
 
+def should_find_opposite_terms(entity_id: str, find_opposite_terms: str) -> bool:
+    """
+    Determine if opposite terms should be found based on the find_opposite_terms setting
+    and the library group detected from entity_id.
+    
+    Args:
+        entity_id: The entity ID which may contain library name
+        find_opposite_terms: "true"/"false"/"auto" (case-insensitive)
+        
+    Returns:
+        True if opposite terms should be found, False otherwise
+    """
+    setting = str(find_opposite_terms).lower().strip()
+    
+    if setting in ["true", "t", "1", "yes"]:
+        return True
+    elif setting in ["false", "f", "0", "no"]:
+        return False
+    elif setting == "auto":
+        # Groups that should automatically enable opposite term finding
+        auto_enable_groups = [
+            "Drug_and_Chemical_Perturbations",
+            "Gene_Perturbations", 
+            "Protein_Domains_and_Complexes",
+            "Gene_Regulation",
+            "Miscellaneous"
+        ]
+        
+        # Also check library filenames that belong to these groups
+        auto_enable_libraries = [
+            # Drug & Chemical Perturbations
+            "LINCS_L1000_Chem_Pert_Consensus_Sigs",
+            "RummaGEO_DrugPerturbations_2025",
+            "DrugMatrix",
+            "DSigDB",
+            "RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO",
+            # Gene Perturbations
+            "LINCS_L1000_CRISPR_KO_Consensus_Sigs",
+            "RummaGEO_GenePerturbations_2025",
+            "PerturbAtlas",
+            # Protein Domains & Complexes
+            "InterPro_Domains_2019",
+            "Pfam_Domains_2019",
+            "CORUM",
+            # Gene Regulation
+            "Rummagene_transcription_factors",
+            "TargetScan_microRNA",
+            "lncHUB_lncRNA_Co-Expression",
+            "TF_Perturbations_Followed_by_Expression",
+            # Miscellaneous
+            "Epigenomics_Roadmap_HM_ChIP-seq",
+            "Virus-Host_PPI_P-HIPSTer_2020",
+            "HMDB_Metabolites",
+            "ProteomicsDB_2020",
+            "GlyGen_Glycosylated_Proteins_2022",
+            "Rummagene_kinases",
+            "Chromosome_Location",
+        ]
+        
+        entity_lower = entity_id.lower()
+        
+        # Check if entity_id contains any of the auto-enable groups or libraries
+        for group in auto_enable_groups:
+            if group.lower() in entity_lower:
+                return True
+        
+        for lib in auto_enable_libraries:
+            if lib.lower() in entity_lower:
+                return True
+        
+        return False
+    else:
+        # Default to False if unrecognized setting
+        return False
+
+
 def generate_output_folder(entity_id: str, pipeline_short_name: str) -> str:
     return f"{entity_id}_{pipeline_short_name}"
 
@@ -304,7 +380,8 @@ def _generate_figures(
     formats: List[str],
     entity_id: str,
     library_name: str = "",
-    verbose: bool = True
+    verbose: bool = True,
+    find_opposite_terms: str = "auto"
 ) -> List[str]:
     """Generate publication-quality figures for the analysis.
     
@@ -324,6 +401,9 @@ def _generate_figures(
             _figure_distance_cosine_hexbin,
             _figure_pca_term_space,
             _figure_signature_heatmap,
+            _figure_top_matches_opposite,
+            _figure_distance_cosine_hexbin_opposite,
+            _figure_pca_term_space_opposite,
         )
         
         _configure_matplotlib()
@@ -357,25 +437,46 @@ def _generate_figures(
         fig_path, data_path = _figure_signature_heatmap(figures_dir, sig, formats, library_name)
         figure_paths.extend([fig_path, data_path])
         
+        # Generate opposite term figures if enabled
+        if should_find_opposite_terms(entity_id, find_opposite_terms) and term_signatures and len(term_signatures) > 0:
+            fig_path, data_path = _figure_top_matches_opposite(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+            
+            fig_path, data_path = _figure_distance_cosine_hexbin_opposite(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+            
+            fig_path, data_path = _figure_pca_term_space_opposite(figures_dir, sig, term_signatures, formats, library_name)
+            figure_paths.extend([fig_path, data_path])
+        
         # Create index file
         index_path = os.path.join(figures_dir, f"{entity_id}_figure_index.json")
         import json
+        
+        descriptions = {
+            "term_signatures_distributions": "Distribution of gene coverage across precomputed term signatures",
+            "dimension_filtering": "Standard deviation distribution across embedding dimensions",
+            "dimension_filtering_bar": "Bar chart showing selected vs filtered dimensions",
+            "top_matches_example": "Top matching terms from the reference library",
+            "similarity_distributions": "Distribution of distance and cosine similarity scores",
+            "distance_cosine_hexbin": "2D density plot of distance vs cosine similarity",
+            "pca_term_space": "PCA projection of term signatures with top matches highlighted",
+            "signature_heatmap": "Heatmap of signature mean and std vectors",
+        }
+        
+        if should_find_opposite_terms(entity_id, find_opposite_terms):
+            descriptions.update({
+                "top_opposite_matches_example": "Top opposite/different terms from the reference library",
+                "distance_cosine_hexbin_opposite": "2D density plot with opposite matches highlighted",
+                "pca_term_space_opposite": "PCA projection with opposite matches highlighted",
+            })
+        
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump({
                 "entity_id": entity_id,
                 "figures_directory": os.path.abspath(figures_dir),
                 "figure_files": [os.path.abspath(p) for p in figure_paths],
                 "formats": formats,
-                "description": {
-                    "term_signatures_distributions": "Distribution of gene coverage across precomputed term signatures",
-                    "dimension_filtering": "Standard deviation distribution across embedding dimensions",
-                    "dimension_filtering_bar": "Bar chart showing selected vs filtered dimensions",
-                    "top_matches_example": "Top matching terms from the reference library",
-                    "similarity_distributions": "Distribution of distance and cosine similarity scores",
-                    "distance_cosine_hexbin": "2D density plot of distance vs cosine similarity",
-                    "pca_term_space": "PCA projection of term signatures with top matches highlighted",
-                    "signature_heatmap": "Heatmap of signature mean and std vectors",
-                }
+                "description": descriptions
             }, f, indent=2)
         figure_paths.append(index_path)
         
@@ -409,6 +510,7 @@ def geneset_embedding(
     cv_threshold: float = 1.0,
     z_threshold: float = 0.5,
     top_k: int = 25,
+    find_opposite_terms: str = "auto",
     enable_clustering: bool = True,
     cluster_min_genes: int = 20,
     random_state: int = 17,
@@ -638,13 +740,16 @@ def geneset_embedding(
         # Term matching per sample
         if term_signatures is not None and "term_matching" in steps_set and s.get("signature") is not None:
             sig: Signature = s["signature"]
+            dims_mask = make_dims_mask(
+                dims_filter, sig.mean, sig.std, q_low=q_low, cv_threshold=cv_threshold, z_threshold=z_threshold
+            )
+            
+            # Find closest terms
             ranked = rank_terms(
                 sig.mean,
                 sig.std,
                 term_signatures,
-                dims_mask=make_dims_mask(
-                    dims_filter, sig.mean, sig.std, q_low=q_low, cv_threshold=cv_threshold, z_threshold=z_threshold
-                ),
+                dims_mask=dims_mask,
                 top_k=top_k,
             )
             match_csv = os.path.join(
@@ -664,6 +769,32 @@ def geneset_embedding(
             # Summarize top-3 terms for results doc
             preview = ", ".join([f"{t.term[:40]} (d={dist:.3g}, cos={cos:.3g})" for t, dist, cos in ranked[:3]])
             sample_match_summaries.append(f"{sid}: {preview}")
+            
+            # Find opposite terms if enabled
+            if should_find_opposite_terms(entity_id, find_opposite_terms):
+                opposite_ranked = rank_terms_most_opposite(
+                    sig.mean,
+                    sig.std,
+                    term_signatures,
+                    dims_mask=dims_mask,
+                    top_k=top_k,
+                )
+                opposite_match_csv = os.path.join(
+                    output_dir, f"{clean_id}_{pipeline_short}_{sid}_opposite_term_matches.csv"
+                )
+                opposite_rows = [["term_id", "library", "term", "distance", "cosine", "n_found", "coverage"]]
+                for t, dist, cos in opposite_ranked:
+                    opposite_rows.append([t.term_id, t.library, t.term, f"{dist:.6g}", f"{cos:.6g}", t.n_found, f"{t.coverage:.3g}"])
+                _write_csv(opposite_match_csv, opposite_rows[0], opposite_rows[1:])
+                _print_output(opposite_match_csv, "csv", f"Top opposite term matches for {sid}", verbose=verbose_output)
+                artifacts.append(os.path.abspath(opposite_match_csv))
+                if verbose_output:
+                    print(
+                        f"STEP: opposite_term_matching done sample={sid} top_k={min(top_k, len(opposite_ranked))}"
+                    )
+                # Summarize top-3 opposite terms for results doc
+                opposite_preview = ", ".join([f"{t.term[:40]} (d={dist:.3g}, cos={cos:.3g})" for t, dist, cos in opposite_ranked[:3]])
+                sample_match_summaries.append(f"{sid} (opposite): {opposite_preview}")
 
     # Write QC summary
     if per_sample_qc_rows and "qc" in steps_set:
@@ -1084,7 +1215,8 @@ def geneset_embedding(
             figure_formats,
             clean_id,
             lib_name,
-            verbose_output
+            verbose_output,
+            find_opposite_terms
         )
         artifacts.extend(figure_paths)
 
