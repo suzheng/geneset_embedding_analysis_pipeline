@@ -9,6 +9,7 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.main import main as run_main
+from scripts.generate_manuscript_prompt import generate_manuscript_prompt
 
 
 def main() -> None:
@@ -21,19 +22,20 @@ def main() -> None:
     embeddings_path = str(project_root / "data" / "GeneRAIN-vec.200d.txt")
     
     # Example input gene list (pick a few common ones likely present)
-    example_genes = "TP53,EGFR,BRCA1,BRCA2,PTEN,KRAS,APOE,MYC,ALK,MTHFR,CFTR,TNF"
+    example_genes = "TLR1,TLR2,LBP,RAGE,NOD2,MBL2,TNFA,LTA,IL1B,IL6,IL8,IL10,IFNG,CXCL1,CXCL12,MIF,FCGR2A,PAI-1,ACE,LCE4A,TAGAP,VDR,MIR608"
     
     # Prepare command-line arguments for main.py
     # Run analysis for the "Gene_Perturbations" group as an example
     sys.argv = [
         "run_real_data_example.py",
         "--embeddings-path", embeddings_path,
-        "--entity-id", "example_run",
+        "--entity-id", "sepsis",
+        "--associated-item", "sepsis",
         "--input-genes", example_genes,
-        "--library-group", "Gene_Perturbations",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
+        "--library-group", "all-but-disease",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
         "--dims-filter", "quantile",
         "--q-low", "0.3",
-        "--top-k", "25",
+        "--top-k", "20",
         "--no-clustering",
     ]
     
@@ -44,6 +46,27 @@ def main() -> None:
     
     # Call the main function from main.py
     run_main()
+    
+    # After run: generate consolidated manuscript prompt in the entity-id folder
+    def _get_arg_value(flag: str) -> str | None:
+        if flag in sys.argv:
+            i = sys.argv.index(flag)
+            if i + 1 < len(sys.argv):
+                return sys.argv[i + 1]
+        return None
+
+    entity_id = _get_arg_value("--entity-id") or "run"
+    output_folder = _get_arg_value("--output-folder")
+    workspace = os.getenv("PROJECT_WORKSPACE_VOLUME_PATH") or os.getcwd()
+    if output_folder:
+        entity_dir = Path(workspace) / output_folder / entity_id
+    else:
+        entity_dir = Path(workspace) / entity_id
+
+    prompt_path = generate_manuscript_prompt(str(entity_dir))
+    print()
+    print("Generated manuscript prompt:")
+    print(prompt_path)
     
     print()
     print("=" * 80)
