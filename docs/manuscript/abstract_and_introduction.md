@@ -1,0 +1,23 @@
+# Abstract
+
+**Background**
+Sepsis mortality is driven by a dysregulated host immune response, often involving simultaneous inflammation and immune suppression. This complexity complicates the identification of effective treatments using standard analysis methods.
+
+**Methods**
+We applied a machine learning approach to analyze gene expression patterns in sepsis. This method filters out noise to identify stable biological signals. We compared these signals against databases of biological pathways and drug responses to find clinically relevant insights.
+
+**Results**
+Our analysis confirmed that sepsis involves both immune activation (driven by Th17 cells) and immune exhaustion (weakened T cell function). We also found a strong molecular link between acute sepsis and Idiopathic Pulmonary Fibrosis (IPF), a chronic lung disease, suggesting shared mechanisms of tissue damage. Finally, our data points to the drug ruxolitinib as a potential treatment to balance this immune dysregulation.
+
+**Conclusion**
+This study clarifies the complex immune landscape of sepsis and identifies new links to chronic lung disease. These findings suggest that targeting specific immune pathways could offer better treatment options for septic patients.
+
+# Introduction
+
+Sepsis represents one of the most significant challenges in modern medicine, accounting for millions of deaths annually despite advances in critical care. Fundamentally, sepsis is defined as life-threatening organ dysfunction caused by a dysregulated host response to infection [[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4968574/]]. While early theories largely attributed mortality to an uncontrolled hyperinflammatory "cytokine storm," contemporary understanding has evolved to recognize a more complex pathophysiology. It is now understood that patients frequently exhibit a concurrent state of profound immune suppression, or "immunoparalysis," which compromises the host's ability to clear the primary infection and increases susceptibility to secondary pathogens [[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5826615/]]. This heterogeneity in immune status—where pro-inflammatory and anti-inflammatory cascades may actively coexist—is a primary reason for the repeated failure of "one-size-fits-all" immunomodulatory clinical trials.
+
+The cellular basis of this immune dysregulation involves a diverse array of leukocytes. T helper 17 (Th17) cells, for instance, are potent drivers of the acute inflammatory response, recruiting neutrophils to sites of infection and amplifying cytokine production [[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3745330/]]. However, persistent antigen stimulation in the septic environment can simultaneously drive T cells into a state of exhaustion, characterized by the expression of inhibitory checkpoints and diminished effector function. This exhaustion indicates a failure of the adaptive immune system and is strongly associated with poor clinical outcomes [[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308779/]]. Deciphering the balance between these opposing forces—pathogenic activation versus immune exhaustion—is essential for guiding precise therapeutic interventions.
+
+Genomic and transcriptomic technologies have offered hope for better characterizing these immune states. However, the high dimensionality and noise inherent in standard gene expression analysis can obscure robust biological signals, making it difficult to identify reproducible clinical biomarkers. To overcome this, we applied a self-supervised deep learning approach to project sepsis-associated gene sets into a stable embedding space. By filtering for dimensions with high biological coherence, we derived a "core" sepsis signature that is less sensitive to technical variation and more reflective of the underlying pathophysiology.
+
+In this study, we utilized this embedding-based methodology to map the molecular landscape of sepsis against broad repositories of clinical and biological knowledge. We report that the core sepsis signature captures the specific duality of Th17 activation and T cell exhaustion, validating the model of concurrent hyperinflammation and immunoparalysis. Furthermore, we identify a striking molecular convergence between acute sepsis and the chronic remodeling seen in Idiopathic Pulmonary Fibrosis (IPF) [[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9487348/]], suggesting a common mechanism of epithelial injury that may connect acute respiratory distress to long-term pulmonary sequelae. These insights not only refine our understanding of sepsis biology but also point toward repurposed therapeutic strategies, such as JAK inhibition, to restore immune homeostasis.

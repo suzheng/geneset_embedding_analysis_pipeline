@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results: Immune Pathways Activated in Sepsis</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 7in;
+            margin: 1in auto;
+            padding: 0.5in;
+        }
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5in;
+        }
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 0.3in;
+            margin-bottom: 0.2in;
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 0.2in;
+            text-indent: 0.3in;
+        }
+        .figure-container {
+            text-align: center;
+            margin: 0.3in 0;
+        }
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .figure-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-top: 0.1in;
+            font-style: italic;
+        }
+        .table-container {
+            margin: 0.3in 0;
+        }
+        .table-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-bottom: 0.1in;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-bottom: 0.2in;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 0.1in;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Results</h1>
+    
+    <h2>Immune Pathways Activated in Sepsis</h2>
+    
+    <p>
+    To identify the biological pathways activated in sepsis, the sepsis-associated gene signature was compared against the Reactome Pathways 2024 library, which contains 2,076 curated pathway terms representing biological processes and signaling cascades. Pathway matching was performed using variance-weighted distance calculations across 60 selected embedding dimensions, where smaller distance values indicate greater similarity between the sepsis signature and pathway signatures. The analysis revealed strong associations with key immune signaling pathways that are central to the inflammatory response in sepsis.
+    </p>
+
+    <p>
+    The highest-ranked pathway match was Interleukin-4 and Interleukin-13 Signaling (distance: 1.999, cosine similarity: 0.850), representing a pathway involved in anti-inflammatory responses and alternative macrophage activation. This was followed by Interleukin-10 Signaling (distance: 2.748, cosine similarity: 0.854), a critical anti-inflammatory pathway that suppresses pro-inflammatory cytokine production. The third-ranked pathway was Chemokine Receptors Bind Chemokines (distance: 3.090, cosine similarity: 0.811), which mediates leukocyte recruitment and migration to sites of infection. These top three pathways demonstrate that the sepsis signature encompasses both pro-inflammatory chemokine-mediated cell recruitment and anti-inflammatory interleukin signaling, reflecting the complex and dynamic nature of the immune response in sepsis.
+    </p>
+
+    <p>
+    Additional interleukin signaling pathways were also highly ranked, including Signaling by Interleukins (distance: 3.216, cosine similarity: 0.757), a broad pathway encompassing multiple interleukin-mediated processes, and Interleukin-6 Family Signaling (distance: 3.910, cosine similarity: 0.734), which plays a central role in acute phase responses and fever during infection. Interleukin-20 Family Signaling (distance: 3.510, cosine similarity: 0.742) and Other Interleukin Signaling (distance: 3.885, cosine similarity: 0.685) were also identified, indicating comprehensive activation of interleukin-mediated immune responses. Tumor necrosis factor signaling was represented by TNFs Bind Their Physiological Receptors (distance: 3.425, cosine similarity: 0.750), a pathway critical for initiating inflammatory cascades and cell death responses. The broad Cytokine Signaling in Immune System pathway (distance: 3.728, cosine similarity: 0.709) was also highly ranked, reflecting the central role of cytokine networks in coordinating the sepsis immune response.
+    </p>
+
+    <p>
+    Pattern recognition receptor pathways were prominently represented, with Toll-like Receptor Cascades (distance: 4.335, cosine similarity: 0.644) and Toll Like Receptor 4 (TLR4) Cascade (distance: 4.568, cosine similarity: 0.622) identified as key pathways for pathogen recognition and initiation of innate immune responses. Cell Recruitment (Pro-Inflammatory Response) (distance: 4.234, cosine similarity: 0.728) was also highly ranked, reflecting the critical process of leukocyte migration to sites of infection. The broad Immune System pathway (distance: 4.264, cosine similarity: 0.669) encompassed multiple immune processes, while Diseases Associated With the TLR Signaling Cascade (distance: 4.616, cosine similarity: 0.650) and Diseases of Immune System (distance: 4.616, cosine similarity: 0.650) highlighted the connection between dysregulated immune signaling and pathological states. These findings demonstrate that the sepsis signature activates fundamental innate immune recognition pathways that trigger downstream inflammatory and cell recruitment responses.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_Reactome_Pathways_2024/figures/top_matches_example.svg" alt="Top pathway matches" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 1.</strong> Top matching pathways from Reactome Pathways 2024 library ranked by variance-weighted distance. Pathways are displayed as horizontal bars, with shorter bars indicating greater similarity to the sepsis gene signature. The x-axis represents the variance-weighted distance metric, where lower values indicate stronger matches. Pathway names are shown on the y-axis. The top 10 pathways are displayed, including interleukin signaling pathways, chemokine receptors, and cytokine signaling cascades.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Table 1. Top matching pathways from Reactome Pathways 2024 library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+        The complete ranked list of pathway matches is available in the supplementary data file. The table includes the following columns: pathway name, variance-weighted distance (lower values indicate greater similarity), cosine similarity (ranging from -1 to 1, with values closer to 1 indicating greater directional alignment), number of genes found in the pathway that were successfully mapped to embeddings, and coverage (proportion of pathway genes successfully mapped). Full results are available at: <a href="../../sepsis/sepsis_Reactome_Pathways_2024/sepsis_Reactome_Pathways_2024_geneset_embed_sepsis_Reactome_Pathways_2024_term_matches.csv">sepsis_Reactome_Pathways_2024_term_matches.csv</a>
+        </p>
+    </div>
+
+    <p>
+    The pathway analysis reveals a comprehensive picture of immune activation in sepsis that aligns with established clinical understanding of the condition. The prominence of interleukin-4, interleukin-13, and interleukin-10 signaling pathways reflects the anti-inflammatory counter-regulatory mechanisms that develop alongside pro-inflammatory responses, representing the complex balance between immune activation and resolution that characterizes sepsis. The strong association with chemokine receptor signaling underscores the critical role of leukocyte recruitment in sepsis pathophysiology, where neutrophils, monocytes, and other immune cells migrate to sites of infection but may also contribute to tissue damage. The identification of toll-like receptor cascades, particularly TLR4 signaling, highlights the importance of pathogen recognition receptors in initiating the sepsis response, which is clinically relevant as TLR4 antagonists are being investigated as potential therapeutic interventions. The broad activation of cytokine signaling networks, including interleukin-6 and tumor necrosis factor pathways, reflects the cytokine storm phenomenon observed in severe sepsis, where excessive cytokine production contributes to organ dysfunction and mortality. These findings support the clinical observation that sepsis involves dysregulated immune responses across multiple interconnected pathways, suggesting that therapeutic strategies targeting specific pathways, such as interleukin-10 augmentation or chemokine blockade, may need to be carefully balanced to avoid disrupting beneficial immune functions while controlling harmful inflammation.
+    </p>
+
+</body>
+</html>
+

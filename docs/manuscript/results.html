@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 7in;
+            margin: 1in auto;
+            padding: 0.5in;
+        }
+
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5in;
+        }
+
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 0.3in;
+            margin-bottom: 0.2in;
+        }
+
+        p {
+            text-align: justify;
+            margin-bottom: 0.2in;
+            text-indent: 0.3in;
+        }
+
+        .figure-container {
+            text-align: center;
+            margin: 0.3in 0;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .figure-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-top: 0.1in;
+            font-style: italic;
+        }
+
+        .table-container {
+            margin: 0.3in 0;
+        }
+
+        .table-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-bottom: 0.1in;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-bottom: 0.2in;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 0.1in;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Results</h1>
+
+    <h2>Gene Set Embedding and Quality Control</h2>
+
+    <p>
+        The analysis was performed on a curated set of 23 sepsis-associated genes representing key mediators of the
+        immune response. Quality control assessment demonstrated that 17 of the 23 input genes (73.9%) were successfully
+        mapped to the embedding space. This coverage indicates that the majority of key sepsis mediators were
+        represented, enabling reliable downstream signature computation.
+    </p>
+
+    <p>
+        To ensure the robustness of similarity calculations, a variance-based dimension selection strategy was applied
+        to the 200-dimensional embedding vectors. Dimensions were ranked by their standard deviation across the gene
+        set, and those with variability at or below the 30th percentile were retained (Figure 1). This process
+        identified 60 dimensions (30%) that exhibited coherent behavior across the sepsis gene set, while filtering out
+        140 dimensions with higher variability (Figure 2). This selective approach prioritizes dimensions where the
+        input genes share stable functional characteristics, thereby enhancing the signal-to-noise ratio for subsequent
+        biological term matching.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_Reactome_Pathways_2024/figures/dimension_filtering.svg"
+            alt="Dimension filtering visualization" style="width: 6in;">
+        <div class="figure-caption">
+            <strong>Figure 1.</strong> Distribution of standard deviation values across 200 embedding dimensions. The
+            vertical line marks the 30th percentile threshold used for dimension selection. Dimensions to the left of
+            the threshold were retained for analysis.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_Reactome_Pathways_2024/figures/dimension_filtering_bar.svg"
+            alt="Dimension filtering bar chart" style="width: 6in;">
+        <div class="figure-caption">
+            <strong>Figure 2.</strong> Selection status of embedding dimensions. Orange bars represent the 60 dimensions
+            selected for similarity calculations based on low variability, while blue bars represent the 140 filtered
+            dimensions.
+        </div>
+    </div>
+
+    <h2>Immune Cell Types Involved in Sepsis</h2>
+
+    <p>
+        Comparison of the sepsis gene signature with the CellMarker 2024 library identified specific immune cell
+        populations associated with the sepsis response. The analysis revealed strong variance-weighted distance matches
+        with T Helper 17 (Th17) cells, a subset known to drive pro-inflammatory responses, as well as exhausted CD8+ and
+        CD4+ T cell populations (Figure 3). This pattern is consistent with the simultaneous hyperinflammation and
+        immune paralysis often observed in sepsis patients.
+    </p>
+
+    <p>
+        Innate immune cells were also prominently represented. High-ranking matches included monocytes, tissue-resident
+        macrophages (e.g., lung macrophages), and neutrophils (Figure 3, Figure 4). The identification of both bone
+        marrow and blood-derived neutrophil signatures aligns with the rapid mobilization of these cells during acute
+        infection. Additionally, the presence of dendritic cell and B cell signatures suggests a coordinated activation
+        of antigen presentation and adaptive humoral responses.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_CellMarker_2024/figures/top_matches_example.svg" alt="Top cell type matches"
+            style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 3.</strong> Top matching cell types from the CellMarker 2024 library. Cell types are ranked
+            by variance-weighted distance, with shorter bars indicating greater similarity to the sepsis gene signature.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_CellMarker_2024/figures/pca_term_space.svg"
+            alt="PCA projection of cell type signatures" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 4.</strong> Principal component analysis (PCA) projection of cell type signatures. The sepsis
+            gene signature (marker) is shown relative to the landscape of cell type signatures, with top matches
+            highlighted.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Supplementary Table 1. Top matching cell types from CellMarker 2024 library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+            Full results available at: <a
+                href="../../sepsis/sepsis_CellMarker_2024/sepsis_CellMarker_2024_geneset_embed_sepsis_CellMarker_2024_term_matches.csv">sepsis_CellMarker_2024_term_matches.csv</a>
+        </p>
+    </div>
+
+    <h2>Immune Pathways Activated in Sepsis</h2>
+
+    <p>
+        Pathway analysis using the Reactome 2024 library highlighted the activation of key immune signaling cascades.
+        The sepsis signature showed high similarity to Interleukin-4, Interleukin-13, and Interleukin-10 signaling
+        pathways (Figure 5). The prominence of these anti-inflammatory and regulatory pathways, alongside
+        pro-inflammatory chemokine receptor binding and Toll-like Receptor (TLR) cascades (particularly TLR4), reflects
+        the complex immune dysregulation characteristic of sepsis, involving both cytokine storm and compensatory
+        anti-inflammatory responses.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_Reactome_Pathways_2024/figures/top_matches_example.svg" alt="Top pathway matches"
+            style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 5.</strong> Top matching pathways from the Reactome Pathways 2024 library. Pathways are
+            ranked by variance-weighted distance, with shorter bars indicating greater similarity.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Supplementary Table 2. Top matching pathways from Reactome Pathways 2024 library
+        </div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+            Full results available at: <a
+                href="../../sepsis/sepsis_Reactome_Pathways_2024/sepsis_Reactome_Pathways_2024_geneset_embed_sepsis_Reactome_Pathways_2024_term_matches.csv">sepsis_Reactome_Pathways_2024_term_matches.csv</a>
+        </p>
+    </div>
+
+    <h2>Comparison to Other Infectious and Fibrotic Diseases</h2>
+
+    <p>
+        To contextualize the sepsis signature within the broader landscape of human disease, we compared it against the
+        RNA-Seq Disease Gene and Drug Signatures library. The analysis revealed a marked similarity to signatures of
+        severe bacterial infections, including macrophage responses to <em>Yersinia pseudotuberculosis</em>,
+        <em>Staphylococcus epidermidis</em>, and <em>Mycobacterium tuberculosis</em> (Figure 6). This suggests that the
+        core sepsis signature captures conserved host responses to bacterial pathogens.
+    </p>
+
+    <p>
+        Notably, the highest-ranked match was Idiopathic Pulmonary Fibrosis (IPF), accompanied by other fibrotic lung
+        disease signatures. This association highlights the potential shared pathophysiological mechanisms between the
+        acute inflammatory damage in sepsis (often manifesting as Acute Respiratory Distress Syndrome) and the
+        pathological tissue remodeling seen in chronic fibrotic conditions. Matches to Lipopolysaccharide (LPS)
+        stimulation signatures further validated the ability of the embedding approach to detect established drivers of
+        sepsis-associated inflammation (Figure 7, Figure 8).
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/top_matches_example.svg"
+            alt="Top disease signature matches" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 6.</strong> Top matching disease signatures from the RNA-Seq Disease library. Signatures are
+            ranked by variance-weighted distance.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/distance_cosine_hexbin.svg"
+            alt="Distance-cosine similarity distribution" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 7.</strong> Density plot of variance-weighted distance vs. cosine similarity for disease
+            signatures. Top matches (magenta points) cluster in the high-similarity region.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/pca_term_space.svg"
+            alt="PCA projection of disease signatures" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 8.</strong> PCA projection of disease signatures. The sepsis signature (orange star) and top
+            matching disease signatures (green points) are shown within the global disease space.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Supplementary Table 3. Top matching disease signatures from RNA-Seq Disease Gene and
+            Drug Signatures from GEO library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+            Full results available at: <a
+                href="../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO_geneset_embed_sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO_term_matches.csv">sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO_term_matches.csv</a>
+        </p>
+    </div>
+
+    <h2>Therapeutic Implications and Drug Repurposing</h2>
+
+    <p>
+        Analysis of drug perturbation signatures from the RummaGEO and DSigDB libraries identified several therapeutic
+        classes with gene expression profiles similar to the sepsis signature, suggesting potential for drug
+        repurposing.
+    </p>
+
+    <p>
+        <strong>Validation with Established Therapies:</strong> Corticosteroids were among the most consistent top
+        matches, with fluticasone, beclomethasone, and methylprednisolone ranking highly in the DSigDB analysis (Figure
+        9). This aligns with the current clinical use of corticosteroids in septic shock to dampen dysregulated
+        inflammation. The matching of these established therapies validates the biological relevance of the derived
+        sepsis signature.
+    </p>
+
+    <p>
+        <strong>Immunomodulatory Candidates:</strong> Several immunomodulators were identified, including calcitriol
+        (Vitamin D), which has been linked to sepsis susceptibility, and glutamine, a critical nutrient for immune cell
+        metabolism. The analysis also highlighted ruxolitinib, a JAK1/2 inhibitor, suggesting that targeting the
+        JAK/STAT pathway could be a viable strategy to modulate cytokine storm (Figure 10).
+    </p>
+
+    <p>
+        <strong>Other Potential Candidates:</strong> Matches to proteasome inhibitors (bortezomib) and epigenetic
+        modifiers (azacitidine) point to broader regulatory mechanisms that could be targeted. However, the application
+        of such potent agents would require precise timing and patient selection given the dynamic nature of sepsis
+        immunity.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_DSigDB/figures/top_matches_example.svg" alt="Top drug matches from DSigDB"
+            style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 9.</strong> Top matching drug signatures from the DSigDB library. Corticosteroids (e.g.,
+            fluticasone, beclomethasone) are prominent among the top matches.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/figures/top_matches_example.svg"
+            alt="Top drug perturbation matches from RummaGEO" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 10.</strong> Top matching drug perturbation signatures from the RummaGEO library. Matches
+            include metabolic modulators (glutamine) and kinase inhibitors (ruxolitinib).
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Supplementary Table 4. Top matching drugs from DSigDB library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+            Full results available at: <a
+                href="../../sepsis/sepsis_DSigDB/sepsis_DSigDB_geneset_embed_sepsis_DSigDB_term_matches.csv">sepsis_DSigDB_term_matches.csv</a>
+        </p>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Supplementary Table 5. Top matching drug interactions from RummaGEO library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+            Full results available at: <a
+                href="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/sepsis_RummaGEO_DrugPerturbations_2025_geneset_embed_sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv">sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv</a>
+        </p>
+    </div>
+
+</body>
+
+</html>

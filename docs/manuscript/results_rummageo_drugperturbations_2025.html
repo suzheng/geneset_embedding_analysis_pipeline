@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results: Drug Perturbation Signatures from RummaGEO</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 7in;
+            margin: 1in auto;
+            padding: 0.5in;
+        }
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5in;
+        }
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 0.3in;
+            margin-bottom: 0.2in;
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 0.2in;
+            text-indent: 0.3in;
+        }
+        .figure-container {
+            text-align: center;
+            margin: 0.3in 0;
+        }
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .figure-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-top: 0.1in;
+            font-style: italic;
+        }
+        .table-container {
+            margin: 0.3in 0;
+        }
+        .table-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-bottom: 0.1in;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-bottom: 0.2in;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 0.1in;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Results</h1>
+    
+    <h2>Drug Perturbation Signatures from Gene Expression Omnibus Studies</h2>
+    
+    <p>
+    To identify drug perturbations that modulate gene expression patterns similar to the sepsis signature, the sepsis-associated gene set was compared against the RummaGEO Drug Perturbations 2025 library, which contains 5,344 drug perturbation signatures derived from published Gene Expression Omnibus (GEO) studies. These signatures represent experimentally observed gene expression changes following drug treatment in various experimental models, providing real-world evidence of drug effects on transcriptional programs. Similarity matching was performed using variance-weighted distance calculations across selected embedding dimensions, where smaller distance values indicate greater similarity between the sepsis signature and drug-induced expression patterns. The analysis revealed strong associations with several clinically relevant compounds that modulate immune and inflammatory responses, supporting potential drug repurposing opportunities for sepsis treatment.
+    </p>
+
+    <p>
+    The highest-ranked match was glutamine (distance: 3.002, cosine similarity: 0.769), an amino acid that serves as a central regulator of immune cell metabolism and modulates cytokine expression. Glutamine supplementation has been evaluated in critically ill and septic patients, with clinical trials showing mixed results and some studies reporting potential harm in certain patient populations. The match to a glutamine perturbation signature aligns with established knowledge that glutamine metabolism is altered in sepsis and that immune cell function depends on adequate glutamine availability. The second-ranked match was temozolomide (distance: 3.391, cosine similarity: 0.742), an alkylating chemotherapeutic agent used in brain tumor treatment. While not directly linked to sepsis biology, temozolomide can alter cytokine expression and cause severe immunosuppression that predisposes patients to serious infections, potentially explaining the observed signature overlap. The third-ranked match was bortezomib (distance: 3.448, cosine similarity: 0.739), a proteasome inhibitor used in multiple myeloma treatment that affects nuclear factor-kappa B signaling and inflammatory pathways. Preclinical sepsis models have shown divergent effects of proteasome inhibition depending on timing and dosing, suggesting context-dependent modulation of inflammatory responses.
+    </p>
+
+    <p>
+    Calcitriol, the active form of vitamin D, ranked fourth (distance: 3.465, cosine similarity: 0.737) and seventh (distance: 3.602, cosine similarity: 0.720) across different experimental conditions. Vitamin D receptor signaling has been repeatedly associated with sepsis susceptibility and outcomes, with vitamin D deficiency linked to increased infection risk and worse clinical outcomes in critically ill patients. The match to calcitriol perturbation signatures is consistent with established literature linking vitamin D status to immune function and sepsis pathophysiology. Ruxolitinib, a Janus kinase 1 and 2 inhibitor approved for myeloproliferative disorders, ranked fifth (distance: 3.496, cosine similarity: 0.720) and appeared multiple times in the top matches. Ruxolitinib downregulates JAK/STAT-mediated cytokine signaling, including interleukin-6 and interferon pathways, and preclinical models of hyperinflammation and sepsis have demonstrated reduction of key sepsis cytokines and amelioration of organ injury when administered appropriately. These findings suggest that the sepsis signature overlaps with JAK/STAT-regulated programs, identifying a potentially actionable therapeutic target.
+    </p>
+
+    <p>
+    Additional notable matches included curcumin (distance: 3.594, cosine similarity: 0.755), a natural product with anti-inflammatory properties derived from turmeric that has been investigated for various inflammatory conditions. Azacitidine (distance: 3.633, cosine similarity: 0.736) and decitabine (distance: 3.658, cosine similarity: 0.732), both DNA methyltransferase inhibitors used in hematologic malignancies, were also highly ranked. These epigenetic modifiers can alter immune cell function and cytokine production, potentially explaining their association with the sepsis signature. Berberine (distance: 3.712, cosine similarity: 0.722), a plant-derived alkaloid with antimicrobial and anti-inflammatory properties, was another natural product match. While these compounds represent diverse drug classes, they share common themes of immune modulation and anti-inflammatory activity, suggesting that multiple mechanisms may be relevant to modulating the sepsis response.
+    </p>
+
+    <p>
+    The RummaGEO Drug Perturbations analysis provides evidence-based identification of drug repurposing candidates derived from real experimental data published in the scientific literature. Unlike curated drug signature databases, these perturbation signatures reflect actual observed effects of drug treatments in experimental models, providing additional validation of potential therapeutic targets. The identification of compounds with established links to sepsis biology, such as glutamine and calcitriol, validates the approach by demonstrating that the embedding-based method can identify clinically relevant associations. The discovery of less obvious candidates, such as ruxolitinib and bortezomib, suggests novel therapeutic opportunities that warrant further investigation. The diversity of drug classes represented among the top matches, including metabolic modulators, epigenetic modifiers, kinase inhibitors, and natural products, indicates that multiple therapeutic strategies may be viable for targeting the sepsis response. These findings highlight the value of computational approaches that leverage large-scale experimental data to identify drug repurposing opportunities, particularly for conditions like sepsis where therapeutic options remain limited and new treatment strategies are urgently needed.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/figures/top_matches_example.svg" alt="Top drug perturbation matches" style="width: 3.4in; height: 4.5in;">
+        <div class="figure-caption">
+            <strong>Figure 1.</strong> Top matching drug perturbation signatures from RummaGEO Drug Perturbations 2025 library ranked by variance-weighted distance. Drug perturbations are displayed as horizontal bars, with shorter bars indicating greater similarity to the sepsis gene signature. The x-axis represents the variance-weighted distance metric, where lower values indicate stronger matches. Drug names and experimental conditions (GEO study identifiers, species, and direction of change) are shown on the y-axis. The top 10 drug perturbations are displayed, including metabolic modulators (glutamine), chemotherapeutic agents (temozolomide, bortezomib), vitamin D signaling (calcitriol), kinase inhibitors (ruxolitinib), natural products (curcumin, berberine), and epigenetic modifiers (azacitidine, decitabine).
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/figures/distance_cosine_hexbin.svg" alt="Distance-cosine similarity distribution" style="width: 3.4in; height: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 2.</strong> Two-dimensional density plot showing the joint distribution of variance-weighted distance (x-axis) and cosine similarity (y-axis) across all drug perturbation signatures in RummaGEO Drug Perturbations 2025. The color intensity (blue gradient) represents the density of drug perturbations in each hexagonal bin. Overlaid magenta points highlight the top matching drug perturbations, which cluster in the low-distance, high-cosine-similarity region, indicating both spatial proximity and directional alignment with the sepsis signature. The distribution illustrates the overall landscape of drug perturbation signatures and highlights the distinct positioning of top matches relative to the broader library.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/figures/pca_term_space.svg" alt="PCA projection of drug perturbation signatures" style="width: 3.4in; height: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 3.</strong> Principal component analysis projection of all drug perturbation signatures in RummaGEO Drug Perturbations 2025, with PC1 and PC2 axes labeled by their explained variance ratios. Background points (light blue) represent all drug perturbations in the library, illustrating the global structure of drug perturbation signature space. Green points indicate the top matching drug perturbations, showing their spatial proximity to the sepsis gene signature. The sepsis signature is shown as an orange star, positioned within the drug perturbation signature landscape. Drug perturbations that cluster near the sepsis signature are functionally related and may represent potential repurposing candidates based on their shared transcriptional effects.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Table 1. Top matching drug perturbation signatures from RummaGEO Drug Perturbations 2025 library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+        The complete ranked list of drug perturbation matches is available in the supplementary data file. The table includes the following columns: term identifier, library name, drug perturbation description (including GEO study identifier, experimental condition, drug name, species, and direction of change), variance-weighted distance (lower values indicate greater similarity), cosine similarity (ranging from -1 to 1, with values closer to 1 indicating greater directional alignment), number of genes found in the drug perturbation signature that were successfully mapped to embeddings, and coverage (proportion of drug perturbation signature genes successfully mapped). Full results are available at: <a href="../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/sepsis_RummaGEO_DrugPerturbations_2025_geneset_embed_sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv">sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv</a>
+        </p>
+    </div>
+
+</body>
+</html>
+

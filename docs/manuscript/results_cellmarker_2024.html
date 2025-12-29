@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results: Immune Cell Types Involved in Sepsis</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            max-width: 7in;
+            margin: 1in auto;
+            padding: 0.5in;
+        }
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5in;
+        }
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 0.3in;
+            margin-bottom: 0.2in;
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 0.2in;
+            text-indent: 0.3in;
+        }
+        .figure-container {
+            text-align: center;
+            margin: 0.3in 0;
+        }
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .figure-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-top: 0.1in;
+            font-style: italic;
+        }
+        .table-container {
+            margin: 0.3in 0;
+        }
+        .table-caption {
+            font-size: 10pt;
+            text-align: left;
+            margin-bottom: 0.1in;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-bottom: 0.2in;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 0.1in;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Results</h1>
+    
+    <h2>Immune Cell Types Involved in Sepsis</h2>
+    
+    <p>
+    To identify which immune cell types are involved in the sepsis response, the sepsis-associated gene signature was compared against the CellMarker 2024 library, which contains 1,692 curated cell type marker signatures representing distinct immune and non-immune cell populations across human and mouse tissues. Cell type matching was performed using variance-weighted distance calculations across selected embedding dimensions, where smaller distance values indicate greater similarity between the sepsis signature and cell type marker signatures. The analysis revealed strong associations with multiple immune cell populations that play central roles in the inflammatory response during sepsis.
+    </p>
+
+    <p>
+    The highest-ranked cell type match was T Helper 17 (Th17) Cell (distance: 3.428, cosine similarity: 0.820), a pro-inflammatory T cell subset that produces interleukin-17 and plays a critical role in host defense against extracellular pathogens. Th17 cells are known to be involved in severe inflammatory responses and have been implicated in sepsis pathophysiology. Additional T cell populations were also highly ranked, including Exhausted CD8+ T Cell (distance: 4.253, cosine similarity: 0.663) and Exhausted CD4+ T Cell (distance: 4.354, cosine similarity: 0.647), which represent T cell states characterized by reduced effector function that can develop during chronic or severe infections. These exhausted T cell signatures suggest that sepsis may be associated with T cell dysfunction, which is clinically relevant as T cell exhaustion has been linked to poor outcomes in sepsis patients. A general T Cell signature was also identified (distance: 4.262, cosine similarity: 0.718), indicating broad T cell involvement in the sepsis response.
+    </p>
+
+    <p>
+    Myeloid cell populations were prominently represented among the top matches. Monocyte signatures were highly ranked, with Monocyte Bone Marrow Mouse showing the strongest match (distance: 3.885, cosine similarity: 0.697) among myeloid cells. Macrophage Lung Mouse was also identified (distance: 4.104, cosine similarity: 0.724), reflecting the importance of tissue-resident macrophages in the immune response. Neutrophil populations were represented by Stage II Neutrophil Bone Marrow Mouse (distance: 4.197, cosine similarity: 0.662) and Neutrophil Blood Human (distance: 4.299, cosine similarity: 0.720), indicating neutrophil involvement in sepsis, which aligns with the clinical observation that neutrophils are among the first responders to infection and play a central role in sepsis pathophysiology. Mast Cell Bone Marrow Mouse (distance: 3.562, cosine similarity: 0.746) and Basophil Undefined Human (distance: 4.160, cosine similarity: 0.725) were also highly ranked, representing granulocyte populations involved in allergic and inflammatory responses. The broad Myeloid Cell Bone Marrow Human signature (distance: 4.252, cosine similarity: 0.695) and Myeloid Cell Bone Marrow Mouse signature (distance: 4.377, cosine similarity: 0.696) were identified, reflecting the central role of myeloid lineage cells in coordinating the sepsis immune response.
+    </p>
+
+    <p>
+    Other immune cell types were also identified among the top matches. CD1C+ A Dendritic Cell Blood Human (distance: 3.948, cosine similarity: 0.724) was highly ranked, representing a dendritic cell subset involved in antigen presentation and T cell activation. B Cell Undefined Human (distance: 4.055, cosine similarity: 0.690) was also identified, indicating B cell involvement in the sepsis response, which may relate to antibody production and humoral immune responses. Eosinophil Blood Human (distance: 4.342, cosine similarity: 0.733) was present among the top matches, representing another granulocyte population involved in inflammatory responses.
+    </p>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_CellMarker_2024/figures/top_matches_example.svg" alt="Top cell type matches" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 1.</strong> Top matching cell types from CellMarker 2024 library ranked by variance-weighted distance. Cell types are displayed as horizontal bars, with shorter bars indicating greater similarity to the sepsis gene signature. The x-axis represents the variance-weighted distance metric, where lower values indicate stronger matches. Cell type names are shown on the y-axis. The top 10 cell types are displayed, including T helper 17 cells, mast cells, monocytes, dendritic cells, B cells, macrophages, basophils, neutrophils, and myeloid cells.
+        </div>
+    </div>
+
+    <div class="figure-container">
+        <img src="../../sepsis/sepsis_CellMarker_2024/figures/pca_term_space.svg" alt="PCA projection of cell type signatures" style="width: 3.4in;">
+        <div class="figure-caption">
+            <strong>Figure 2.</strong> Principal component analysis (PCA) projection of cell type marker signatures from the CellMarker 2024 library. Each point represents a cell type signature projected onto the first two principal components. The sepsis gene signature is highlighted as a distinct marker. Top matching cell types are highlighted to show their spatial relationship to the sepsis signature in the embedding space. The x-axis and y-axis represent the first and second principal components, respectively. This visualization demonstrates the clustering of similar cell types and the proximity of top matches to the sepsis signature.
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-caption">Table 1. Top matching cell types from CellMarker 2024 library</div>
+        <p style="text-indent: 0; font-size: 10pt; margin-top: 0.1in;">
+        The complete ranked list of cell type matches is available in the supplementary data file. The table includes the following columns: cell type name, tissue source, species, variance-weighted distance (lower values indicate greater similarity), cosine similarity (ranging from -1 to 1, with values closer to 1 indicating greater directional alignment), number of marker genes found that were successfully mapped to embeddings, and coverage (proportion of cell type marker genes successfully mapped). Full results are available at: <a href="../../sepsis/sepsis_CellMarker_2024/sepsis_CellMarker_2024_geneset_embed_sepsis_CellMarker_2024_term_matches.csv">sepsis_CellMarker_2024_term_matches.csv</a>
+        </p>
+    </div>
+
+    <p>
+    The cell type analysis reveals a comprehensive picture of immune cell involvement in sepsis that aligns with established clinical understanding of the condition. The prominence of Th17 cells reflects the pro-inflammatory T cell response that contributes to tissue damage in severe sepsis, while the identification of exhausted T cell signatures suggests that prolonged immune activation may lead to T cell dysfunction, which is clinically relevant as T cell exhaustion has been associated with increased mortality in sepsis patients. The strong representation of myeloid cells, including monocytes, macrophages, and neutrophils, underscores the central role of innate immune cells in sepsis pathophysiology. Neutrophils are among the first responders to infection and are critical for bacterial clearance, but excessive neutrophil activation can contribute to organ damage through the release of reactive oxygen species and proteases. Monocytes and macrophages coordinate the immune response through cytokine production and antigen presentation, but dysregulated macrophage activation can contribute to the cytokine storm observed in severe sepsis. The identification of mast cells and basophils suggests that these granulocyte populations may also contribute to the inflammatory response, potentially through the release of histamine and other mediators. The presence of dendritic cell and B cell signatures indicates that both innate and adaptive immune responses are activated, reflecting the complex interplay between different arms of the immune system during sepsis. These findings support the clinical observation that sepsis involves activation of multiple immune cell populations across both innate and adaptive immunity, suggesting that therapeutic strategies targeting specific cell types, such as modulating T cell function or controlling myeloid cell activation, may need to be carefully balanced to preserve beneficial immune functions while controlling harmful inflammation.
+    </p>
+
+</body>
+</html>
+

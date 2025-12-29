@@ -1,0 +1,3 @@
+Please review the analysis design, the code function by function, and review the input data format, size, execution log and output files and figures. and think deeply if the right analysis strategy have been used. Has it follow the best practice in bioinformatics analysis? We can never makeup data!! We should not roll back to a method that is not good to avoid error. 
+Focus on the issues that can lead to incorrect result. Do NOT add complexity to results or analyses that have been correct.
+Please think deeply. And add a concise review result to a markdown docs/concise_review_result.md
