@@ -14,6 +14,7 @@ from .cluster import maybe_cluster_vectors
 from .embeddings_io import get_vectors_for_genes, load_embeddings
 from .match import TermSignature, rank_terms, rank_terms_farthest, rank_terms_most_opposite
 from .report import ensure_dir, write_json
+from .llm_interpreter import interpret_top_matches_with_llm, load_background_text
 from .signature import (
     Signature,
     compute_signature,
@@ -291,9 +292,10 @@ def _write_method_doc(output_dir: str, entity_id: str, pipeline_short: str, step
     return path
 
 
-def _write_shared_method_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True) -> str:
+def _write_shared_method_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True, base_output_dir: Optional[str] = None) -> str:
     """Write shared methodology that is the same across all runs."""
-    shared_dir = os.path.join(output_dir, "shared_doc")
+    target_output_dir = base_output_dir or output_dir
+    shared_dir = os.path.join(target_output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     path = os.path.join(shared_dir, f"SHARED_{step}.METHOD.md")
     _write_text(path, text)
@@ -316,9 +318,10 @@ def _write_result_doc(output_dir: str, entity_id: str, pipeline_short: str, step
     return path
 
 
-def _write_shared_result_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True) -> str:
+def _write_shared_result_doc(entity_id: str, output_dir: str, step: str, text: str, verbose: bool = True, base_output_dir: Optional[str] = None) -> str:
     """Write shared result interpretation that is the same across all runs."""
-    shared_dir = os.path.join(output_dir, "shared_doc")
+    target_output_dir = base_output_dir or output_dir
+    shared_dir = os.path.join(target_output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     path = os.path.join(shared_dir, f"SHARED_{step}.RESULT_INTERPRETATION.md")
     _write_text(path, text)
@@ -326,9 +329,10 @@ def _write_shared_result_doc(entity_id: str, output_dir: str, step: str, text: s
     return path
 
 
-def _copy_background_doc(output_dir: str, verbose: bool = True) -> str:
+def _copy_background_doc(output_dir: str, verbose: bool = True, base_output_dir: Optional[str] = None) -> str:
     """Copy BACKGROUND.md from src directory to shared_doc folder."""
-    shared_dir = os.path.join(output_dir, "shared_doc")
+    target_output_dir = base_output_dir or output_dir
+    shared_dir = os.path.join(target_output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     
     # Determine the source path for BACKGROUND.md in the src directory
@@ -349,9 +353,10 @@ def _copy_background_doc(output_dir: str, verbose: bool = True) -> str:
         return ""
 
 
-def _write_figure_legend_doc(entity_id: str, output_dir: str, library_name: str, find_opposite_terms: str, verbose: bool = True) -> str:
+def _write_figure_legend_doc(entity_id: str, output_dir: str, library_name: str, find_opposite_terms: str, verbose: bool = True, base_output_dir: Optional[str] = None) -> str:
     """Write comprehensive figure legends for all generated figures."""
-    shared_dir = os.path.join(output_dir, "shared_doc")
+    target_output_dir = base_output_dir or output_dir
+    shared_dir = os.path.join(target_output_dir, "shared_doc")
     os.makedirs(shared_dir, exist_ok=True)
     path = os.path.join(shared_dir, "FIGURE_LEGEND.md")
     
@@ -687,6 +692,7 @@ def _generate_figures(
 def geneset_embedding(
     embeddings_path: str,
     entity_id: str,
+    associated_item: str,
     output_folder: Optional[str] = None,
     input_genes: Optional[Iterable[str]] = None,
     input_genes_file: Optional[str] = None,
@@ -707,6 +713,8 @@ def geneset_embedding(
     verbose_output: bool = True,
     generate_figures: bool = False,
     figure_formats: Optional[List[str]] = None,
+    show_top5_matches: bool = False,
+    shared_doc_dir: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Production-oriented pipeline for gene set embedding matching with flexible inputs.
@@ -765,7 +773,7 @@ def geneset_embedding(
     samples.append({"sample_id": clean_id, "genes": list(input_genes), "reference_genes": ref_genes_list})
 
     # Copy background documentation to shared_doc folder
-    background_path = _copy_background_doc(output_dir, verbose=verbose_output)
+    background_path = _copy_background_doc(output_dir, verbose=verbose_output, base_output_dir=shared_doc_dir)
     if background_path:
         artifacts.append(os.path.abspath(background_path))
 
@@ -788,7 +796,7 @@ def geneset_embedding(
             "This approach highlights the distinctive features of the input gene set relative to the reference. "
             "Clustering is automatically disabled in differential mode to maintain a single comparative signature.\n\n"
         )
-        _write_shared_method_doc(clean_id, output_dir, "preprocess", shared_method_text, verbose=verbose_output)
+        _write_shared_method_doc(clean_id, output_dir, "preprocess", shared_method_text, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific parameters
         hdbscan_text = ""
@@ -965,6 +973,27 @@ def geneset_embedding(
             preview = ", ".join([f"{t.term[:40]} (d={dist:.3g}, cos={cos:.3g})" for t, dist, cos in ranked[:3]])
             sample_match_summaries.append(f"{sid}: {preview}")
             
+            # Print top 5 matches to stdout if enabled
+            if show_top5_matches and len(ranked) > 0:
+                library_name = os.path.basename(precomputed_terms_jsonl).replace('.signatures.jsonl', '') if precomputed_terms_jsonl else "unknown"
+                print(f"\n=== TOP 5 MATCHES - {library_name.upper()} ===")
+                for i, (t, dist, cos) in enumerate(ranked[:5], 1):
+                    print(f"{i:2d}. {t.term} (distance: {dist:.4f})")
+                print()
+                
+                # Call LLM interpreter to interpret top matches
+                top_matches_list = [{"term": t.term, "distance": f"{dist:.4f}"} for t, dist, cos in ranked[:5]]
+                background_text = load_background_text()
+                interpret_top_matches_with_llm(
+                    top_matches=top_matches_list,
+                    library_name=library_name,
+                    background_text=background_text,
+                    associated_item=associated_item,
+                    entity_id=clean_id,
+                    output_dir=output_dir,
+                    query_genes=genes,
+                )
+            
             # Find opposite terms if enabled
             if should_find_opposite_terms(entity_id, find_opposite_terms):
                 opposite_ranked = rank_terms_most_opposite(
@@ -1023,7 +1052,7 @@ def geneset_embedding(
             "better-defined clusters). Only solutions with silhouette score > 0.35 and minimum cluster size > 2 genes "
             "are accepted. When clustering conditions are not met or fail, all genes are treated as a single group.\n\n"
         )
-        _write_shared_method_doc(clean_id, output_dir, "qc", shared_method_qc, verbose=verbose_output)
+        _write_shared_method_doc(clean_id, output_dir, "qc", shared_method_qc, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific QC parameters
         params_qc = (
@@ -1059,7 +1088,7 @@ def geneset_embedding(
             "Conversely, when no clustering structure is detected (all genes form a single group), this indicates "
             "functional homogeneity, suggesting the genes are coherently related to a unified biological function.\n\n"
         )
-        _write_shared_result_doc(clean_id, output_dir, "qc", shared_result_qc, verbose=verbose_output)
+        _write_shared_result_doc(clean_id, output_dir, "qc", shared_result_qc, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific QC results
         result_text_qc = (
@@ -1121,7 +1150,7 @@ def geneset_embedding(
             "the interpretability of the original embedding space coordinates. For visualization purposes "
             "(e.g., PCA, t-SNE, UMAP), post-hoc standardization can be applied if needed.\n\n"
         )
-        _write_shared_method_doc(clean_id, output_dir, "cohort_integration", shared_method_ci, verbose=verbose_output)
+        _write_shared_method_doc(clean_id, output_dir, "cohort_integration", shared_method_ci, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific parameters
         params_ci = (
@@ -1144,7 +1173,7 @@ def geneset_embedding(
             "Matrix statistics (mean, SD, range) provide a summary of the overall embedding distribution "
             "and can be used to assess data quality and detect potential issues.\n\n"
         )
-        _write_shared_result_doc(clean_id, output_dir, "cohort_integration", shared_result_ci, verbose=verbose_output)
+        _write_shared_result_doc(clean_id, output_dir, "cohort_integration", shared_result_ci, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific cohort integration results
         result_text_ci = (
@@ -1188,7 +1217,7 @@ def geneset_embedding(
             "genes are coherent. To ensure numerical stability in downstream distance calculations, σ_d values "
             "below 1×10⁻⁸ are clamped to this minimum threshold.\n\n"
         )
-        _write_shared_method_doc(clean_id, output_dir, "signature", shared_method_sig, verbose=verbose_output)
+        _write_shared_method_doc(clean_id, output_dir, "signature", shared_method_sig, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific parameters
         params_sig = (
@@ -1213,7 +1242,7 @@ def geneset_embedding(
             "Coverage indicates the fraction of input genes with available embeddings. High coverage (>80%) suggests "
             "comprehensive representation, while lower coverage may warrant inspection of missing genes.\n\n"
         )
-        _write_shared_result_doc(clean_id, output_dir, "signature", shared_result_sig, verbose=verbose_output)
+        _write_shared_result_doc(clean_id, output_dir, "signature", shared_result_sig, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Calculate signature statistics across all samples
         n_sigs = len(signature_files)
@@ -1278,7 +1307,7 @@ def geneset_embedding(
             "with cosine similarity used as a secondary criterion for tie-breaking. The top K most similar "
             "terms are retained for interpretation.\n\n"
         )
-        _write_shared_method_doc(clean_id, output_dir, "term_matching", shared_method_tm, verbose=verbose_output)
+        _write_shared_method_doc(clean_id, output_dir, "term_matching", shared_method_tm, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific parameters (this is where library-specific info goes)
         params_tm = (
@@ -1330,7 +1359,7 @@ def geneset_embedding(
             "- Low coverage or quality issues in the query gene set\n\n"
             "Coverage of matched terms indicates how well-represented those terms are in the embedding space.\n\n"
         )
-        _write_shared_result_doc(clean_id, output_dir, "term_matching", shared_result_tm, verbose=verbose_output)
+        _write_shared_result_doc(clean_id, output_dir, "term_matching", shared_result_tm, verbose=verbose_output, base_output_dir=shared_doc_dir)
         
         # Run-specific term matching results
         library_name = "unknown"
@@ -1376,6 +1405,7 @@ def geneset_embedding(
             "steps_to_run": sorted(list(steps_set)),
             "differential_mode": ref_genes_list is not None and len(ref_genes_list) > 0,
             "n_reference_genes": len(ref_genes_list) if ref_genes_list else 0,
+            "associated_item": associated_item,
         },
     }
     run_info_path = os.path.join(output_dir, f"{clean_id}_{pipeline_short}_run_info.json")
@@ -1421,7 +1451,8 @@ def geneset_embedding(
             output_dir, 
             lib_name, 
             find_opposite_terms,
-            verbose_output
+            verbose_output,
+            base_output_dir=shared_doc_dir
         )
         artifacts.append(legend_path)
 

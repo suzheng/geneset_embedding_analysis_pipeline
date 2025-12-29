@@ -33,7 +33,7 @@ def _get_libraries_for_group(
     Get list of library filenames for a specific group or all groups.
     
     Args:
-        group_name: Either a specific group name or "all"
+        group_name: Either a specific group name, "all", or "all-but-disease"
         selected_libraries_file: Path to selected_libraries.txt
         
     Returns:
@@ -46,6 +46,14 @@ def _get_libraries_for_group(
         all_libraries = []
         for libraries in group_to_libraries.values():
             all_libraries.extend(libraries)
+        return all_libraries
+    elif group_name.lower() == "all-but-disease":
+        # Return all libraries except from disease-related groups
+        excluded_groups = {"Disease_and_Phenotype_Associations", "Rare_Disease_Associations"}
+        all_libraries = []
+        for group, libraries in group_to_libraries.items():
+            if group not in excluded_groups:
+                all_libraries.extend(libraries)
         return all_libraries
     else:
         # Return libraries for specific group
@@ -64,6 +72,7 @@ def _parse_args() -> argparse.Namespace:
     )
     p.add_argument("--embeddings-path", required=True, help="Path to embeddings .txt file")
     p.add_argument("--entity-id", required=True, help="Unique identifier for this run")
+    p.add_argument("--associated-item", required=True, help="What the input genes are associated with (e.g., disease, phenotype, molecular event)")
     p.add_argument("--output-folder", required=False, default=None, help="Override output folder name")
 
     # Inputs (single sample)
@@ -90,7 +99,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--precomputed-terms-jsonl", help="Precomputed term signatures JSONL path (single file)")
     p.add_argument(
         "--library-group", 
-        help="Library group name from Group_Clean column in selected_libraries.txt, or 'all' for all groups"
+        help="Library group name from Group_Clean column in selected_libraries.txt, or 'all' for all groups, or 'all-but-disease' to exclude disease-related groups"
     )
     p.add_argument(
         "--selected-libraries-file",
@@ -130,6 +139,9 @@ def _parse_args() -> argparse.Namespace:
     # Figure generation options
     p.add_argument("--generate-figures", action="store_true", default=True, help="Generate publication-quality figures")
     p.add_argument("--figure-formats", nargs='+', default=["svg"], help="Figure formats (default: svg png)")
+    
+    # Output options
+    p.add_argument("--show-top5-matches", action="store_true", default=True, help="Show top 5 matches with term names and similarity/distance scores in stdout for each library")
 
     return p.parse_args()
 
@@ -250,6 +262,13 @@ def main() -> None:
         
         print("=" * 80)
         
+        # Create parent folder for this entity-id if output_folder is specified
+        parent_output_folder = args.output_folder
+        if args.output_folder:
+            parent_output_folder = os.path.join(args.output_folder, args.entity_id)
+        else:
+            parent_output_folder = args.entity_id
+        
         # Run analysis for each library separately
         results = []
         for idx, library_filename in enumerate(libraries, 1):
@@ -263,14 +282,17 @@ def main() -> None:
                 print(f"  WARNING: Precomputed signatures not found, skipping.")
                 continue
             
-            # Create a unique entity_id for this library
+            # Create library-specific entity_id and output folder
             library_entity_id = f"{args.entity_id}_{library_name}"
+            # Create a subfolder for each library under the parent folder
+            library_output_folder = os.path.join(parent_output_folder, library_entity_id)
             
             try:
                 result = geneset_embedding(
                     embeddings_path=args.embeddings_path,
                     entity_id=library_entity_id,
-                    output_folder=args.output_folder,
+                    associated_item=args.associated_item,
+                    output_folder=library_output_folder,  # Library-specific subfolder
                     input_genes=input_genes,
                     input_genes_file=args.input_genes_file,
                     reference_genes=reference_genes,
@@ -289,6 +311,8 @@ def main() -> None:
                     verbose_output=False,  # Suppress detailed OUTPUT: lines for batch processing
                     generate_figures=args.generate_figures,
                     figure_formats=args.figure_formats,
+                    show_top5_matches=args.show_top5_matches,
+                    shared_doc_dir=parent_output_folder,  # Shared docs go in parent folder
                 )
                 results.append({
                     "library": library_filename,
@@ -312,6 +336,25 @@ def main() -> None:
         print(f"Total libraries:  {len(libraries)}")
         print(f"Successful:       {successful}")
         print(f"Failed:           {len(results) - successful}")
+        # Print output location
+        if args.output_folder:
+            base_path = Path(args.output_folder) / args.entity_id
+        else:
+            base_path = Path(args.entity_id)
+        print(f"\nOutput structure:")
+        print(f"  {base_path}/")
+        print(f"  ├── shared_doc/  (shared documentation for all libraries)")
+        print(f"  │   ├── BACKGROUND.md")
+        print(f"  │   ├── FIGURE_LEGEND.md")
+        print(f"  │   └── SHARED_*.md files")
+        print(f"  ├── {args.entity_id}_<library_1>/  (library 1 results)")
+        print(f"  │   ├── figures/")
+        print(f"  │   ├── *.csv, *.json, *.md files")
+        print(f"  │   └── ...")
+        print(f"  ├── {args.entity_id}_<library_2>/  (library 2 results)")
+        print(f"  │   ├── figures/")
+        print(f"  │   └── ...")
+        print(f"  └── ...")
         print("=" * 80)
         
     else:
@@ -324,6 +367,7 @@ def main() -> None:
         geneset_embedding(
             embeddings_path=args.embeddings_path,
             entity_id=args.entity_id,
+            associated_item=args.associated_item,
             output_folder=args.output_folder,
             input_genes=input_genes,
             input_genes_file=args.input_genes_file,
@@ -342,6 +386,7 @@ def main() -> None:
             random_state=args.random_state,
             generate_figures=args.generate_figures,
             figure_formats=args.figure_formats,
+            show_top5_matches=args.show_top5_matches,
         )
 
 
