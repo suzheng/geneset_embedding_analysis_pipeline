@@ -4,4 +4,4 @@ Please read @docs/manuscript.md, skip abstract section. Process it paragraph by 
 ].
 
 For every paper you find, you must verify it by reading the abstract to ensure the paper is appropriate. If a paper is not suitable, continue searching for better ones. Do not invent non-existent references, and do not guess DOI numbers.
-Do not open a browser — instead, retrieve HTML or text directly.
+Do not open a browser — instead, retrieve HTML or text directly. please use your web search tool. do not write script to do it. 

@@ -1,7 +1,7 @@
 
 ### Disease Signature Similarity Analysis
 
-To characterize the biological context of sepsis, we compared the functional signature derived from the sepsis-associated genes against 1,302 disease and perturbation signatures from RNA-Seq Disease Gene and Drug Signatures in GEO. Overall, sepsis demonstrated the strongest molecular similarity to severe infectious and fibrotic lung disease signatures, suggesting shared host response programs involving immune activation and tissue injury repair.
+To characterize the biological context of sepsis, we compared the functional signature derived from the sepsis-associated genes against 1,302 disease and perturbation signatures from RNA-Seq Disease Gene and Drug Signatures in GEO [https://doi.org/10.1038/ncomms12846]. Overall, sepsis demonstrated the strongest molecular similarity to severe infectious and fibrotic lung disease signatures, suggesting shared host response programs involving immune activation and tissue injury repair.
 
 The highest-ranked match was idiopathic pulmonary fibrosis (IPF) lung tissue (distance: 3.203; cosine similarity: 0.837). Clinically, this association is notable because both sepsis and IPF involve progressive epithelial damage and aberrant tissue remodeling. In sepsis, such processes are particularly relevant to patients who develop acute respiratory distress syndrome and long-term pulmonary fibrosis after prolonged mechanical ventilation.
 

@@ -2,7 +2,7 @@
 
 ## Functional Mapping of Sepsis Gene Signature to Drug Perturbation Signatures
 
-To further identify potential therapeutic compounds associated with the sepsis molecular signature, we also compared the sepsis-associated gene signature against 5,344 drug perturbation signatures from the RummaGEO Drug Perturbations library, which contains experimentally derived transcriptional responses to drug exposure. The analysis identified several clinically relevant compounds with strong transcriptional similarity to the sepsis signature, suggesting potential drug repurposing opportunities for immune modulation in sepsis.
+To further identify potential therapeutic compounds associated with the sepsis molecular signature, we also compared the sepsis-associated gene signature against 5,344 drug perturbation signatures from the RummaGEO Drug Perturbations library [https://doi.org/10.1016/j.patter.2024.101072], which contains experimentally derived transcriptional responses to drug exposure. The analysis identified several clinically relevant compounds with strong transcriptional similarity to the sepsis signature, suggesting potential drug repurposing opportunities for immune modulation in sepsis.
 
 The highest-ranked match was glutamine (distance: 3.002, cosine similarity: 0.769), an amino acid that plays a central role in immune cell metabolism and cytokine regulation. This finding is consistent with prior studies demonstrating altered glutamine metabolism during critical illness and sepsis. Clinical trials of glutamine supplementation in critically ill patients have reported heterogeneous outcomes, reflecting the context-dependent nature of immune metabolic support in sepsis.
 

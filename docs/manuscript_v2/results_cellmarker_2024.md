@@ -1,7 +1,7 @@
 
 ## Immune Cell Types Associated With the Sepsis Signature
 
-To characterize the immune landscape associated with sepsis, we compared the sepsis genetic signature against the CellMarker reference library, which contains curated marker profiles for 1,692 immune and non-immune cell populations. Cell type similarity was assessed using a variance-weighted distance metric in embedding space, where smaller distances indicate stronger functional similarity between the sepsis signature and reference cell type signatures.
+To characterize the immune landscape associated with sepsis, we compared the sepsis genetic signature against the CellMarker reference library [https://doi.org/10.1093/nar/gkac947], which contains curated marker profiles for 1,692 immune and non-immune cell populations. Cell type similarity was assessed using a variance-weighted distance metric in embedding space, where smaller distances indicate stronger functional similarity between the sepsis signature and reference cell type signatures.
 
 The analysis revealed strong enrichment of both adaptive and innate immune cell populations, consistent with the complex immunological dysregulation observed in sepsis. Among adaptive immune cells, B cell signatures showed the strongest similarity to the sepsis signature (distance: 3.250; cosine similarity: 0.809), suggesting activation of humoral immune responses during sepsis. B cells contribute to host defense through antibody production and antigen presentation, and their activation may reflect ongoing pathogen recognition and immune adaptation.
 
