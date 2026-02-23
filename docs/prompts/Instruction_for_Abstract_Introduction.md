@@ -4,7 +4,7 @@ Manuscript contain content that clinical doctors know more and care about. and M
 generate it as a markdown in the docs/manuscript/ folder.
 
 The abstract and introduction need to be very easy to understand for clinical doctors. 
-The abstract has to be short, has to be under 200 words.
+The abstract has to be short, has to be under 200 words. The abstract need to be able to be read by clinical doctors, and read by researchers from other fields, you have to avoid jargons etc. 
 For relevant introduction statement, make sure you use web search to search for literatures to support your statement. 
 Keep in mind, the literatures HAVE to from peer review journal. It can't be from wikipedia etc. sources.
 

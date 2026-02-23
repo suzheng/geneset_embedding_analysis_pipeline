@@ -1,4 +1,4 @@
-Your task is to create  publication-level detailed Methods sections, based on analysis code, results and figures.
+Your task is to create  publication-level detailed Methods section, based on analysis code, results and figures.
 
 Each section should be writting into a separate markdown file in the docs. 
 Manuscript contain content that clinical doctor know more and care about more. and Make it very easy to explain to clinical doctors. please avoid the results that only biology scientists know about. 

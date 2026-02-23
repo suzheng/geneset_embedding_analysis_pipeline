@@ -1,7 +1,7 @@
 Your task is to write publication-level detailed Results sections, based on analysis code, results and figures.
 Manuscript contain content that clinical doctor know more and care about more. and Make it very easy to explain to clinical doctors. please avoid the results that only biology scientists know about. 
 
-generate it as a html in the docs/ folder.
+generate it as a html in the docs/manuscript/ folder.
 
 For each analysis, make sure you include: 
 
