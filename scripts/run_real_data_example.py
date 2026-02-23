@@ -22,17 +22,19 @@ def main() -> None:
     embeddings_path = str(project_root / "data" / "GeneRAIN-vec.200d.txt")
     
     # Example input gene list (pick a few common ones likely present)
-    example_genes = "TLR1,TLR2,LBP,RAGE,NOD2,MBL2,TNFA,LTA,IL1B,IL6,IL8,IL10,IFNG,CXCL1,CXCL12,MIF,FCGR2A,PAI-1,ACE,LCE4A,TAGAP,VDR,MIR608"
+    # Updated with correct aliases found in embeddings:
+    # RAGE → AGER, TNFA → TNF, IL8 → CXCL8, PAI-1 → SERPINE1
+    example_genes = "TLR1,TLR2,LBP,AGER,NOD2,MBL2,TNF,LTA,IL1B,IL6,CXCL8,IL10,IFNG,CXCL1,CXCL12,MIF,FCGR2A,SERPINE1,ACE,LCE4A,TAGAP,VDR,MIR608"
     
-    # Prepare command-line arguments for main.py
-    # Run analysis for the "Gene_Perturbations" group as an example
+        # Prepare command-line arguments for main.py
+    # Run analysis for just one library as an example (faster)
     sys.argv = [
         "run_real_data_example.py",
         "--embeddings-path", embeddings_path,
-        "--entity-id", "sepsis",
+        "--entity-id", "sepsis_test",
         "--associated-item", "sepsis",
         "--input-genes", example_genes,
-        "--library-group", "all-but-disease",  # Try: Gene_Ontology, Pathways, Drug_and_Chemical_Perturbations, etc.
+        "--precomputed-terms-jsonl", str(project_root / "precomputed" / "GO_Biological_Process_2025.signatures.jsonl"),  # Single library
         "--dims-filter", "quantile",
         "--q-low", "0.3",
         "--top-k", "20",
