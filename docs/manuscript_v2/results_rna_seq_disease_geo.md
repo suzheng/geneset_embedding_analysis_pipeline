@@ -1,0 +1,28 @@
+
+### Disease Signature Similarity Analysis
+
+To characterize the biological context of sepsis, we compared the functional signature derived from the sepsis-associated genes against 1,302 disease and perturbation signatures from RNA-Seq Disease Gene and Drug Signatures in GEO. Overall, sepsis demonstrated the strongest molecular similarity to severe infectious and fibrotic lung disease signatures, suggesting shared host response programs involving immune activation and tissue injury repair.
+
+The highest-ranked match was idiopathic pulmonary fibrosis (IPF) lung tissue (distance: 3.203; cosine similarity: 0.837). Clinically, this association is notable because both sepsis and IPF involve progressive epithelial damage and aberrant tissue remodeling. In sepsis, such processes are particularly relevant to patients who develop acute respiratory distress syndrome and long-term pulmonary fibrosis after prolonged mechanical ventilation.
+
+The second-ranked match was Staphylococcus epidermidis macrophage response at 18 hours (distance: 3.276; cosine similarity: 0.817), reflecting strong similarity to innate immune activation triggered by gram-positive bacterial pathogens commonly associated with healthcare-associated infections. Similar patterns were observed for Yersinia pseudotuberculosis macrophage response signatures (distance: 3.362; cosine similarity: 0.815), representing host responses to gram-negative bacterial invasion.
+
+Multiple bacterial infection response signatures were consistently enriched among top-ranking matches. Salmonella typhimurium macrophage responses at 18 hours and 48 hours were both highly ranked (distance range: 3.395–3.497; cosine similarity range: 0.803–0.807), reflecting conserved transcriptional programs associated with systemic bacterial dissemination and host defense. Likewise, Mycobacterium tuberculosis macrophage response signatures were repeatedly identified, including H37Rv and GC1237 strains across 18-hour and 48-hour time points (distance range: 3.489–3.785; cosine similarity range: 0.783–0.801). These results suggest that sepsis shares transcriptional characteristics with both acute and persistent intracellular bacterial infections that require sustained immune activation.
+
+Additional infection-related signatures included heat-inactivated Mycobacterium tuberculosis responses and Staphylococcus epidermidis early response signatures, indicating that pathogen-derived molecular components alone can induce expression patterns similar to those observed in sepsis.
+
+Beyond bacterial infection signatures, immune stimulation by pathogen-associated molecular patterns was also observed. Lipopolysaccharide (LPS)-stimulated macrophage signatures were highly ranked (distance range: 3.908–3.966; cosine similarity: 0.775), consistent with the central role of LPS-triggered inflammatory cascades in sepsis pathogenesis. Bacillus Calmette-Guérin stimulation signatures were also present among high-ranking matches (distance range: 3.859–3.885), further supporting the involvement of innate immune activation pathways.
+
+Finally, idiopathic nonspecific interstitial pneumonia lung tissue signatures were identified among top matches (distance: 4.055; cosine similarity: 0.765), further supporting molecular overlap between acute septic lung injury and chronic fibrotic lung remodeling.
+
+---
+
+### Figure 1. Disease Signature Matching Landscape
+
+The overall distribution of disease signature similarity is summarized in Figure 1.
+
+Figure 1A displays ranked disease signatures based on variance-weighted distance, where shorter bars represent greater similarity to the sepsis signature. Figure 1B shows the joint density distribution of variance-weighted distance and cosine similarity across all reference signatures. High-ranking signatures cluster in the region characterized by low distance and high cosine similarity, indicating both spatial proximity and directional alignment of functional signatures.
+
+Figure 1C presents principal component analysis projection of all reference signatures. Disease signatures cluster around the sepsis signature in embedding space when sharing similar functional immune and inflammatory properties. The sepsis signature forms a distinct but biologically connected region relative to the broader signature landscape.
+
+![Combined analysis of disease signature matches](../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/combined_figure.svg)

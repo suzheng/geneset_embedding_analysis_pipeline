@@ -12,7 +12,7 @@ Pattern recognition receptor pathways were also represented, with Toll-like Rece
 
 ![Top pathway matches](../../sepsis/sepsis_Reactome_Pathways_2024/figures/top_matches_example.svg)
 
-*Figure 1. Top matching pathways from Reactome Pathways 2024 library ranked by variance-weighted distance. Pathways are displayed as horizontal bars, with shorter bars indicating greater similarity to the sepsis gene signature. The x-axis represents the variance-weighted distance metric, where lower values indicate stronger matches. Pathway names are shown on the y-axis. The top 10 pathways are displayed, including interleukin signaling pathways (IL-4, IL-13, IL-10, IL-20, IL-6), chemokine receptors, cytokine signaling, TNF signaling, and cell recruitment pathways.*
+*Figure 1. Matching pathways from Reactome Pathways 2024 library ranked by variance-weighted distance (horizontal bars; shorter bars indicate greater similarity). Pathway names are labeled on the y-axis.*
 
 **Table 1. Top matching pathways from Reactome Pathways 2024 library**
 

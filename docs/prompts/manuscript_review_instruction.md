@@ -1,0 +1,3 @@
+Please review this manuscript section again, generate a todo list, to review paragraph by paragraph, by reading the related code, result files and images, You will have to visually look at the png version of image using visual model, to make sure every number and technical detail are correct. Please do it one by one.
+
+This pipeline is triggerred by scripts/run_real_data_example.py . and the results are in sepsis/
