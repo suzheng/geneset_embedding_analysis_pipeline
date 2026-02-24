@@ -10,14 +10,10 @@ Innate immune sensing pathways were also strongly represented. Toll-like recepto
 
 Collectively, these findings indicate that the sepsis genetic signature captures coordinated activation of pathogen recognition, cytokine signaling, and leukocyte recruitment pathways, consistent with the dysregulated systemic immune response observed clinically in sepsis.
 
-A summary of top pathway matches is shown in Figure 1 and Table 1.
+A summary of top pathway matches is shown in Figure 3 and Supplementary Table 2.
 
 ![Top pathway matches](../../sepsis/sepsis_Reactome_Pathways_2024/figures/top_matches_example.svg)
 
-*Figure 1. Top pathway matches from Reactome Pathways 2024 ranked by variance-weighted distance (shorter bars indicate greater similarity).*
+*Figure 3. Top pathway matches from Reactome Pathways 2024 ranked by variance-weighted distance (shorter bars indicate greater similarity).*
 
-**Table 1. Top matching pathways from Reactome Pathways 2024**
-
-The full ranked pathway list is provided in the supplementary data file:
-[sepsis_Reactome_Pathways_2024_term_matches.csv](../../sepsis/sepsis_Reactome_Pathways_2024/sepsis_Reactome_Pathways_2024_geneset_embed_sepsis_Reactome_Pathways_2024_term_matches.csv)
-
+Top matching pathways are shown in Supplementary Table 2.

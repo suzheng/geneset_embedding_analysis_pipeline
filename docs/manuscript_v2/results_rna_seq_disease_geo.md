@@ -15,14 +15,6 @@ Beyond bacterial infection signatures, immune stimulation by pathogen-associated
 
 Finally, idiopathic nonspecific interstitial pneumonia lung tissue signatures were identified among top matches (distance: 4.055; cosine similarity: 0.765), further supporting molecular overlap between acute septic lung injury and chronic fibrotic lung remodeling.
 
----
+![Combined analysis of disease signature matches](../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/combined_figure.png)
 
-### Figure 1. Disease Signature Matching Landscape
-
-The overall distribution of disease signature similarity is summarized in Figure 1.
-
-Figure 1A displays ranked disease signatures based on variance-weighted distance, where shorter bars represent greater similarity to the sepsis signature. Figure 1B shows the joint density distribution of variance-weighted distance and cosine similarity across all reference signatures. High-ranking signatures cluster in the region characterized by low distance and high cosine similarity, indicating both spatial proximity and directional alignment of functional signatures.
-
-Figure 1C presents principal component analysis projection of all reference signatures. Disease signatures cluster around the sepsis signature in embedding space when sharing similar functional immune and inflammatory properties. The sepsis signature forms a distinct but biologically connected region relative to the broader signature landscape.
-
-![Combined analysis of disease signature matches](../../sepsis/sepsis_RNA-Seq_Disease_Gene_and_Drug_Signatures_from_GEO/figures/combined_figure.svg)
+Figure 4. Disease Signature Matching Landscape. Figure 4A displays ranked disease signatures based on variance-weighted distance, where shorter bars represent greater similarity to the sepsis signature. Figure 4B shows the joint density distribution of variance-weighted distance and cosine similarity across all reference signatures. High-ranking signatures cluster in the region characterized by low distance and high cosine similarity, indicating both spatial proximity and directional alignment of functional signatures. Figure 4C presents principal component analysis projection of all reference signatures. Disease signatures cluster around the sepsis signature in embedding space when sharing similar functional immune and inflammatory properties. The sepsis signature forms a distinct but biologically connected region relative to the broader signature landscape.

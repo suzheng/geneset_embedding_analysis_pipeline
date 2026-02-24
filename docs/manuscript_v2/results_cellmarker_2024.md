@@ -15,24 +15,8 @@ Overall, these findings demonstrate coordinated activation of both innate and ad
 
 ![Cell type analysis results](../../sepsis/sepsis_CellMarker_2024/figures/combined_figure.png)
 
-*Figure 1. Immune cell type association analysis. (A) Cell type similarity ranking based on variance-weighted distance (shorter bars indicate greater similarity). (B) Principal component projection of reference signatures (light blue dots), top matching cell types (green circles), and the sepsis signature (orange star). Clustering of top matches near the sepsis signature indicates functional similarity in embedding space.*
+*Figure 2. Immune cell type association analysis. (A) Cell type similarity ranking based on variance-weighted distance (shorter bars indicate greater similarity). (B) Principal component projection of reference signatures (light blue dots), top matching cell types (green circles), and the sepsis signature (orange star). Clustering of top matches near the sepsis signature indicates functional similarity in embedding space.*
 
-**Table 1. Top matching cell types from CellMarker 2024 library**
-
-| Rank | Cell Type | Distance | Cosine Similarity | Genes Found | Coverage |
-|------|-----------|----------|-------------------|-------------|----------|
-| 1 | B Cell Undefined Human | 3.250 | 0.809 | 96 | 1.000 |
-| 2 | T Helper17 (Th17) Cell Undefined Human | 3.278 | 0.865 | 17 | 0.850 |
-| 3 | Mast Cell Bone Marrow Mouse | 3.463 | 0.811 | 30 | 1.000 |
-| 4 | Monocyte Bone Marrow Mouse | 3.491 | 0.792 | 68 | 0.986 |
-| 5 | M1 Macrophage Lung Human | 3.515 | 0.858 | 23 | 1.000 |
-| 6 | Monocyte Peripheral Blood Human | 3.744 | 0.794 | 65 | 0.956 |
-| 7 | Basophil Undefined Human | 3.749 | 0.804 | 29 | 1.000 |
-| 8 | T Cell Undefined Mouse | 3.775 | 0.795 | 35 | 1.000 |
-| 9 | Myeloid Cell Bone Marrow Human | 3.906 | 0.781 | 120 | 1.000 |
-| 10 | Immune Cell Lung Human | 3.923 | 0.785 | 23 | 1.000 |
-
-The full ranked list of cell type similarities is provided in the supplementary data file:
-[sepsis_CellMarker_2024_term_matches.csv](../../sepsis/sepsis_CellMarker_2024/sepsis_CellMarker_2024_geneset_embed_sepsis_CellMarker_2024_term_matches.csv). The dataset includes cell type name, tissue origin, species, distance metric, cosine similarity, embedding coverage, and marker gene mapping statistics.
+Top matching cell types are shown in Supplementary Table 1. 
 
 

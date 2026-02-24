@@ -1,0 +1,37 @@
+TY  - JOUR
+TI  - Array programming with NumPy
+AU  - Harris, Charles R.
+AU  - Millman, K. Jarrod
+AU  - van der Walt, Stéfan J.
+AU  - Gommers, Ralf
+AU  - Virtanen, Pauli
+AU  - Cournapeau, David
+AU  - Wieser, Eric
+AU  - Taylor, Julian
+AU  - Berg, Sebastian
+AU  - Smith, Nathaniel J.
+AU  - Kern, Robert
+AU  - Picus, Matti
+AU  - Hoyer, Stephan
+AU  - van Kerkwijk, Marten H.
+AU  - Brett, Matthew
+AU  - Haldane, Allan
+AU  - del Río, Jaime Fernández
+AU  - Wiebe, Mark
+AU  - Peterson, Pearu
+AU  - Gérard-Marchant, Pierre
+AU  - Sheppard, Kevin
+AU  - Reddy, Tyler
+AU  - Weckesser, Warren
+AU  - Abbasi, Hameer
+AU  - Gohlke, Christoph
+AU  - Oliphant, Travis E.
+PY  - 2020
+JO  - Nature
+VL  - 585
+IS  - 7825
+SP  - 357
+EP  - 362
+DO  - 10.1038/s41586-020-2649-2
+UR  - https://doi.org/10.1038/s41586-020-2649-2
+ER  -

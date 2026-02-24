@@ -18,15 +18,10 @@ Additional high-ranking matches included curcumin (distance: 3.594, cosine simil
 
 Overall, drug perturbation mapping revealed enrichment of compounds targeting metabolic regulation, epigenetic modification, and cytokine signaling pathways, supporting the hypothesis that sepsis pathophysiology reflects integrated dysregulation across multiple immune regulatory axes.
 
-## Figure 1. Drug Perturbation Signature Landscape
+## Figure 6. Drug Perturbation Signature Landscape
 
 ![Combined analysis of drug perturbation signatures](../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/figures/combined_figure.png)
 
-*Figure 1. Analysis of drug perturbation signatures from the RummaGEO Drug Perturbations 2025 library. (A) Drug perturbation signatures ranked by variance-weighted distance, where shorter bars indicate greater similarity to the sepsis signature. Drug names and experimental conditions are shown on the y-axis. (B) Joint density distribution of variance-weighted distance (x-axis) and cosine similarity (y-axis). Color intensity reflects density in hexagonal bins. Top-ranking perturbations (magenta points) cluster in the low-distance, high-similarity region. (C) Principal component analysis projection of drug perturbation signatures. Light blue dots represent all drug signatures, green circles represent top-ranked matches, and the orange star represents the sepsis signature.*
+*Figure 6. Analysis of drug perturbation signatures from the RummaGEO Drug Perturbations 2025 library. (A) Drug perturbation signatures ranked by variance-weighted distance, where shorter bars indicate greater similarity to the sepsis signature. Drug names and experimental conditions are shown on the y-axis. (B) Joint density distribution of variance-weighted distance (x-axis) and cosine similarity (y-axis). Color intensity reflects density in hexagonal bins. Top-ranking perturbations (magenta points) cluster in the low-distance, high-similarity region. (C) Principal component analysis projection of drug perturbation signatures. Light blue dots represent all drug signatures, green circles represent top-ranked matches, and the orange star represents the sepsis signature.*
 
-## Table 1. Top Drug Perturbation Matches
-
-The complete ranked list of drug perturbation matches is provided in the supplementary data file. The table includes drug signature identifiers, experimental descriptions, variance-weighted distance, cosine similarity, embedding coverage, and gene mapping statistics.
-
-The full dataset is available at:
-[sepsis_RummaGEO_DrugPerturbations_2025_geneset_embed_sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv](../../sepsis/sepsis_RummaGEO_DrugPerturbations_2025/sepsis_RummaGEO_DrugPerturbations_2025_geneset_embed_sepsis_RummaGEO_DrugPerturbations_2025_term_matches.csv)
+Top drug perturbation matches are shown in Supplementary Table 4. 
