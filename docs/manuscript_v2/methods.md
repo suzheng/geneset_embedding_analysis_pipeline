@@ -1,6 +1,7 @@
+
 ## Methods
 
-### Gene Set and Embeddings
+### Gene set and embeddings
 
 The primary analytical unit of this study was a curated set of 23 genes representing host genetic determinants of sepsis susceptibility [https://doi.org/10.1186/s13054-019-2313-0]. By focusing on genes supported by aggregated human genetic evidence rather than individual transcriptomic experiments, we aimed to construct a biologically grounded representation of the host susceptibility architecture of sepsis. This strategy ensures that the subsequent embedding-based analysis reflects core genetic contributors to sepsis risk, rather than context-specific or transient expression changes.
 
@@ -8,21 +9,21 @@ To enable functional comparison of this gene set against diverse biological refe
 
 Embedding vectors were retrieved from GeneRAIN, a transformer-based model trained via self-supervised learning on 410,000 human bulk RNA-seq samples [https://doi.org/10.1186/s13059-025-03749-6]. The model generates 200-dimensional vector representations for each gene, encoding a rich array of biological attributes including protein domain membership, Gene Ontology annotations, disease associations, pathway memberships, transcription factor target relationships, epigenetic marks, cell-type-specific expression patterns, and protein-protein interaction partners. Embeddings were retrieved from a precomputed dictionary containing 200-dimensional vectors for 31,769 human genes. Genes not present in this dictionary were excluded from downstream signature computation.
 
-### Signature Computation
+### Signature computation
 
-[too long, too technical: To enable comparison of the sepsis gene set against reference libraries, the set of individual gene embedding vectors was summarized as a compact statistical signature capturing both the collective functional profile and the internal coherence of the gene set across embedding dimensions.] For each of the 200 embedding dimensions, two summary statistics were computed: a mean vector and a standard deviation vector. The mean vector represents the per-dimension arithmetic mean across all embedded gene vectors in the set, providing a centroid that encodes the average functional characteristics of the gene set in the embedding space. The standard deviation vector was computed using Bessel's correction and quantifies the degree to which individual genes in the set agree or diverge in each semantic dimension: a low standard deviation in a given dimension indicates that all genes share a common attribute encoded by that dimension, whereas a high standard deviation indicates that genes are heterogeneous with respect to that attribute and that the dimension may contribute noise to similarity calculations. To ensure numerical stability in downstream distance computations, standard deviation values below 1×10⁻⁸ were clamped to this minimum threshold.
+To compare the sepsis gene set against reference libraries, we summarized the gene embedding vectors into a compact signature that captures the gene set's functional profile and coherence. For each of the 200 embedding dimensions, two summary statistics were computed: a mean vector and a standard deviation vector. The mean vector represents the per-dimension arithmetic mean across all embedded gene vectors in the set, providing a centroid that encodes the average functional characteristics of the gene set in the embedding space. The standard deviation vector was computed using Bessel's correction and quantifies the degree to which individual genes in the set agree or diverge in each semantic dimension: a low standard deviation in a given dimension indicates that all genes share a common attribute encoded by that dimension, whereas a high standard deviation indicates that genes are heterogeneous with respect to that attribute and that the dimension may contribute noise to similarity calculations. To ensure numerical stability in downstream distance computations, standard deviation values below 1×10⁻⁸ were clamped to this minimum threshold.
 
-### Dimension Selection
+### Dimension selection
 
 Because the 200 embedding dimensions vary substantially in how coherently the sepsis gene set behaves across them, we applied a variance-based dimension selection step prior to similarity matching. The rationale for this step is straightforward: dimensions in which the sepsis genes show high internal variability reflect biological attributes for which the genes are heterogeneous, and including such dimensions in similarity calculations introduces noise that may obscure genuine functional relationships. Conversely, dimensions in which the genes show low variability reflect shared biological attributes—precisely those features most likely to drive meaningful similarity with reference gene sets.
 
 Dimension selection was implemented by ranking all 200 dimensions by their within-set standard deviation values and retaining those at or below the 30th percentile of this distribution. This quantile-based filtering identified 60 dimensions exhibiting the most coherent behavior across the sepsis gene set. The remaining 140 dimensions, characterized by higher within-set variability, were excluded from downstream similarity matching. All subsequent comparisons between the sepsis signature and reference term signatures were conducted exclusively within these 60 selected dimensions.
 
-### Reference Gene Set Libraries
+### Reference gene set libraries
 
 To interpret the sepsis signature in terms of established biology, we compared it against term signatures derived from five curated reference gene set libraries selected for their breadth of coverage and clinical relevance to sepsis pathophysiology. Reactome Pathways 2024 contains 2,076 terms representing well-annotated biological processes and signaling cascades and was used to identify pathway-level associations [https://doi.org/10.1093/nar/gkad1025]. CellMarker 2024 contains 1,692 terms representing curated cell type marker gene sets across human and mouse tissues and was used to identify immune cell populations associated with the sepsis signature [https://doi.org/10.1093/nar/gkac947]. DSigDB contains 4,025 drug-related gene signatures and was used for initial drug repurposing queries [https://doi.org/10.1093/bioinformatics/btv313]. RummaGEO Drug Perturbations 2025 contains 5,344 drug perturbation signatures derived from publicly available Gene Expression Omnibus studies and was used for complementary drug repurposing analysis [https://doi.org/10.1016/j.patter.2024.101072]. RNA-Seq Disease Gene and Drug Signatures from GEO contains 1,302 disease-associated expression signatures from published RNA-seq studies and was used to identify diseases sharing molecular characteristics with the sepsis signature [https://doi.org/10.1038/ncomms12846].
 
-### Term Signature Precomputation and Similarity Matching
+### Term signature precomputation and similarity matching
 
 To enable efficient and consistent similarity search across the thousands of terms in each reference library, signatures were precomputed for every reference term using the identical statistical framework applied to the query gene set. For each term, the associated gene symbols were mapped into the GeneRAIN embedding space, and mean and standard deviation vectors were computed across the resulting gene vectors. Terms with fewer than five genes successfully mapped to the embedding dictionary were excluded from the reference database to ensure that term signatures were based on sufficient information for reliable computation.
 
@@ -30,7 +31,7 @@ Similarity between the sepsis query signature and each reference term signature 
 
 As a complementary metric, cosine similarity between the mean vectors of the query and reference signatures was computed to assess directional alignment independent of magnitude differences, providing a useful secondary measure of functional concordance. Terms were ranked primarily by variance-weighted distance in ascending order, with cosine similarity used for tie-breaking. For each library, the top 20 most similar terms were retained for biological interpretation.
 
-### Quality Control and Software
+### Quality control and software
 
 To ensure that downstream results reflected genuine biological signal rather than artifacts of data incompleteness, quality control metrics were recorded for each analysis run. Gene embedding coverage was calculated as the fraction of input genes successfully mapped to the GeneRAIN dictionary. The analysis recorded coverage metrics, dimension selection statistics, including dimension selection quantile thresholds, numerical stability constants, and ranking criteria, to enable full reproducibility.
 

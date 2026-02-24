@@ -1,5 +1,5 @@
 
-## Immune Cell Types Associated With the Sepsis Signature
+### Immune cell types associated with the sepsis signature
 
 To characterize the immune landscape associated with sepsis, we compared the sepsis genetic signature against the CellMarker reference library {Hu, 2022, CellMarker 2.0: an}, which contains curated marker profiles for 1,692 immune and non-immune cell populations. Cell type similarity was assessed using a variance-weighted distance metric in embedding space, where smaller distances indicate stronger functional similarity between the sepsis signature and reference cell type signatures.
 
@@ -11,12 +11,10 @@ Innate immune populations were also strongly represented. Monocyte signatures fr
 
 Additional innate immune components included mast cells and basophils, which are known to release histamine and inflammatory mediators during acute immune activation (Mast Cell Bone Marrow Mouse: distance 3.463; cosine similarity 0.811; Basophil Undefined Human: distance 3.749; cosine similarity 0.804). Tissue-level immune signatures were also observed, including lung immune cell signatures, reflecting organ-specific immune responses during systemic infection.
 
-Overall, these findings demonstrate coordinated activation of both innate and adaptive immune compartments during sepsis, consistent with the dual inflammatory and immune-suppressive states observed clinically.
+Overall, these findings demonstrate coordinated activation of both innate and adaptive immune compartments during sepsis, consistent with the dual inflammatory and immune-suppressive states observed clinically (Figure 2). Top matching cell types are shown in Supplementary Table 1.
 
 ![Cell type analysis results](../../sepsis/sepsis_CellMarker_2024/figures/combined_figure.png)
 
-*Figure 2. Immune cell type association analysis. (A) Cell type similarity ranking based on variance-weighted distance (shorter bars indicate greater similarity). (B) Principal component projection of reference signatures (light blue dots), top matching cell types (green circles), and the sepsis signature (orange star). Clustering of top matches near the sepsis signature indicates functional similarity in embedding space.*
-
-Top matching cell types are shown in Supplementary Table 1. 
+*Figure 2. Immune cell type association analysis. (A) Cell type similarity ranking based on variance-weighted distance (shorter bars indicate greater similarity). (B) Principal component projection of reference signatures (light blue dots), top matching cell types (green circles), and the sepsis signature (orange star). Clustering of top matches near the sepsis signature indicates functional similarity in embedding space.* 
 
 

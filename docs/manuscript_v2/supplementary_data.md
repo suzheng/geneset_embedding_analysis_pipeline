@@ -1,4 +1,4 @@
-# Supplementary Data
+## Supplementary Data
 
 ## Supplementary Table 1. Top matching cell types from CellMarker 2024 library
 
